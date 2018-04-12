@@ -1,0 +1,35 @@
+{
+  "name": "a52.js",
+  "description": "JavaScript ATSC A/52 (AC-3) decoder",
+  "version": "1.0.0",
+  "license": "ISC",
+  "author": "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
+  "repository": "github:DanielHuisman/a52.js",
+  "keywords": [
+    "atsc",
+    "a52",
+    "ac3",
+    "ac-3",
+    "audio",
+    "decoder",
+    "browser"
+  ],
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "babel src --out-dir lib --copy-files --source-maps",
+    "dev": "babel-node src/index.js",
+    "start": "node lib/index.js",
+    "prepublish": "yarn run build"
+  },
+  "dependencies": {
+    "bit-buffer": "^0.2.3",
+    "through2": "^2.0.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-0": "^6.24.1"
+  }
+}

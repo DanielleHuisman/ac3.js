@@ -1,0 +1,12 @@
+{
+    "presets": [
+        ["env", {
+            "targets": {
+                "browsers": [">1%"],
+                "node": "current"
+            }
+        }],
+        "stage-0"
+    ],
+    "plugins": ["transform-runtime"]
+}
