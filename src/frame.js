@@ -285,10 +285,44 @@ const handleFrameStream = (frameStream) => {
                     }
                 }
 
-                // Parametric information
-                // TODO
+                // Bit-allocation parametric information
+                audblk.baie = frame.getUnsigned(1);
+                if (audblk.baie) {
+                    audblk.sdcycod = frame.getUnsigned(2);
+                    audblk.fdcycod = frame.getUnsigned(2);
+                    audblk.sgaincod = frame.getUnsigned(2);
+                    audblk.dbpbcod = frame.getUnsigned(2);
+                    audblk.floorcod = frame.getUnsigned(3);
+                }
+                audblk.snroffste = frame.getUnsigned(1);
+                if (audblk.snroffste) {
+                    audblk.csnroffst = frame.getUnsigned(6);
+                    if (audblk.cplinu) {
+                        audblk.cplfsnroffst = frame.getUnsigned(4);
+                        audblk.cplfgaincod = frame.getUnsigned(3);
+                    }
 
-                // Allocation information
+                    audblk.fsnroffst = new Array(bsi.nfchans);
+                    audblk.fgaincod = new Array(bsi.nfchans);
+                    for (let ch = 0; ch < bsi.nfchans; ch++) {
+                        audblk.fsnroffst[ch] = frame.getUnsigned(4);
+                        audblk.fgaincod[ch] = frame.getUnsigned(3);
+                    }
+
+                    if (audblk.lfeon) {
+                        audblk.lfefsnroffst = frame.getUnsigned(4);
+                        audblk.lfefgaincod = frame.getUnsigned(3);
+                    }
+                }
+                if (audblk.cplinu) {
+                    audblk.cplleake = frame.getUnsigned(1);
+                    if (audblk.cplleake) {
+                        audblk.cplfleak = frame.getUnsigned(3);
+                        audblk.cplsleak = frame.getUnsigned(3);
+                    }
+                }
+
+                // Delta bit allocation information
                 // TODO
 
                 // Dummy data
