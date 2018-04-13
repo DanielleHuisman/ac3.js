@@ -1,4 +1,4 @@
-import {BitStream} from 'bit-buffer';
+import jDataView from 'jdataview';
 import through from 'through2';
 
 const BIT_RATES = [32,  40,  48,  56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640];
@@ -15,20 +15,20 @@ const handleReadStream = (inputStream) => {
 
             // Read syncinfo
             const frameHeader = inputStream.read(5);
-            const bitStream = new BitStream(frameHeader);
+            const bitStream = new jDataView(frameHeader);
 
             // Validate syncword
-            const syncword = bitStream.readInt16();
-            if (syncword != 0x770b) {
+            const syncword = bitStream.getUint16();
+            if (syncword != 0x0b77) {
                 throw new Error(`Invalid syncword ${syncword.toString(16)}`);
             }
 
             // Validate CRC
-            const crc = bitStream.readInt16();
+            const crc = bitStream.getUint16();
             // TODO: validate CRC
 
-            const frameSizeCode = bitStream.readBits(6);
-            const sampleRateCode = bitStream.readBits(2);
+            const sampleRateCode = bitStream.getUnsigned(2);
+            const frameSizeCode = bitStream.getUnsigned(6);
 
             // Determine bit rate (in kbps) and frame size (in 16-bit words)
             let bitRate = BIT_RATES[frameSizeCode >> 1];
@@ -37,7 +37,7 @@ const handleReadStream = (inputStream) => {
                     frameSize = 2 * bitRate;
                     break;
                 case 0b01:
-                    frameSize = (320 * bitRate) / 147 + (frameSizeCode & 1);
+                    frameSize = Math.floor((320 * bitRate) / 147 + (frameSizeCode & 1));
                     break;
                 case 0b10:
                     frameSize = 3 * bitRate;
@@ -55,13 +55,13 @@ const handleReadStream = (inputStream) => {
             const frame = inputStream.read(frameSize - 5);
 
             // Merge frame header and actual frame
-            outputStream.push(new BitStream(Buffer.concat([frameHeader, frame])));
+            outputStream.push(new jDataView(Buffer.concat([frameHeader, frame])));
         }
 
         // Read frames
         let chunk = null;
         while ((chunk = inputStream.read(frameSize)) !== null) {
-            const bitStream = new BitStream(chunk);
+            const bitStream = new jDataView(chunk);
 
             outputStream.push(bitStream);
         }

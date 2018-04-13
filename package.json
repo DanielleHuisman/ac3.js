@@ -22,7 +22,7 @@
     "prepublish": "yarn run build"
   },
   "dependencies": {
-    "bit-buffer": "^0.2.3",
+    "jdataview": "^2.5.0",
     "through2": "^2.0.3"
   },
   "devDependencies": {

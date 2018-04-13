@@ -9,14 +9,24 @@ const handleFrameStream = (frameStream) => {
             frames++;
 
             // Validate syncword
-            const syncword = frame.readInt16();
-            if (syncword != 0x770b) {
+            const syncword = frame.getUint16();
+            if (syncword != 0x0b77) {
                 throw new Error(`Invalid syncword ${syncword.toString(16)}`);
             }
 
             // Validate CRC
-            const crc = frame.readInt16();
+            const crc = frame.getUint16();
             // TODO: validate CRC
+
+            // Skip frame rate data
+            frame.getInt8();
+
+            const bsid = frame.getUnsigned(5);
+            const bsmod = frame.getUnsigned(3);
+
+            if (bsid !== 0x8) {
+                throw new Error(`Invalid bsid ${bsid.toString(2)}`);
+            }
         }
     });
 
