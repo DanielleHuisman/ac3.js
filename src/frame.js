@@ -115,7 +115,8 @@ const handleFrameStream = (frameStream) => {
 
                 // Coupling strategy information
                 if (frame.getUnsigned(1) !== 0) {
-                    if (frame.getUnsigned(1) !== 0) {
+                    audblk.cplinu = frame.getUnsigned(1);
+                    if (audblk.cplinu) {
                         audblk.chincpl = new Array(bsi.nfchans);
                         for (let i = 0; i < bsi.nfchans; i++) {
                             audblk.chincpl[i] = frame.getUnsigned(1);
@@ -128,18 +129,69 @@ const handleFrameStream = (frameStream) => {
                         audblk.cplbegf = frame.getUnsigned(4);
                         audblk.cplendf = frame.getUnsigned(4);
 
-                        audblk.cplbndstrc = new Array(3 + audblk.cplbegf - audblk.cplendf);
-                        for (let i = 0; i < audblk.cplbndstrc.length; i++) {
+                        audblk.ncplsubnd = 3 + audblk.cplbegf - audblk.cplendf;
+                        audblk.ncplbnd = audblk.ncplsubnd;
+                        audblk.cplbndstrc = new Array(audblk.ncplsubnd);
+                        for (let i = 0; i < audblk.ncplsubnd; i++) {
                             audblk.cplbndstrc[i] = frame.getUnsigned(1);
+
+                            if (i >= 1 && i < audblk.ncplsubnd) {
+                                audblk.ncplbnd -= audblk.cplbndstrc[i];
+                            }
                         }
                     }
                 }
 
                 // Coupling coordinates and phase flags
-                // TODO
+                if (audblk.cplinu) {
+                    audblk.mstrcplco = new Array(bsi.nfchans);
+                    audblk.cplcoe = new Array(bsi.nfchans);
+                    audblk.cplcoexp = new Array(bsi.nfchans);
+                    audblk.cplcomant = new Array(bsi.nfchans);
+
+                    for (let i = 0; i < bsi.nfchans; i++) {
+                        if (audblk.chincpl[i]) {
+                            audblk.cplcoe[i] = frame.getUnsigned(1);
+                            if (audblk.cplcoe[i] !== 0) {
+                                audblk.mstrcplco[i] = frame.getUnsigned(2);
+
+                                audblk.cplcoexp[i] = new Array(audblk.ncplsubnd);
+                                audblk.cplcomant[i] = new Array(audblk.ncplsubnd);
+                                for (let bnd = 0; bnd < audblk.ncplsubnd; bnd++) {
+                                    audblk.cplcoexp[i][bnd] = frame.getUnsigned(4);
+                                    audblk.cplcomant[i][bnd] = frame.getUnsigned(4);
+                                }
+                            }
+                        }
+                    }
+
+                    if (bsi.acmod === 0x2 && audblk.phsflginu && (audblk.cplcoe[0] || audblk.cplcoe[1])) {
+                        audblk.phsflg = new Array(audblk.ncplbnd);
+                        for (let bnd = 0; bnd < audblk.ncplbnd; bnd++) {
+                            audblk.phsflg[bnd] = frame.getUnsigned(1);
+                        }
+                    }
+                }
 
                 // Rematrixing operation in the 2/0 mode
-                // TODO
+                if (bsi.acmod === 0x2) {
+                    audblk.rematstr = frame.getUnsigned(1);
+                    if (audblk.rematstr) {
+                        let bands = 0;
+                        if (audblk.cplbegf > 2 || audblk.cplinu === 0) {
+                            bands = 4;
+                        } else if (audblk.cplbegf > 0 && audblk.cplbegf <= 2 && audblk.cplinu) {
+                            bands = 3;
+                        } else if (audblk.cplbegf === 0 && audblk.cplinu) {
+                            bands = 2;
+                        }
+
+                        audblk.rematflg = new Array(bands);
+                        for (let rbnd = 0; rbnd < bands; rbnd++) {
+                            audblk.rematflg[rbnd]
+                        }
+                    }
+                }
 
                 // Exponent strategy
                 // TODO
