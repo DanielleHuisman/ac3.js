@@ -7,8 +7,8 @@ JavaScript ATSC A/52 (AC-3) decoder
     - [x] `syncinfo`
     - [x] `bsi`
     - [ ] `audblk`
-    - [ ] `auxdata`
-    - [ ] `errorcheck`
+    - [x] `auxdata`
+    - [x] `errorcheck`
 
 ## Decoding implementation
 - [ ] Input Bit Stream

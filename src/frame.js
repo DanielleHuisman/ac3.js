@@ -13,15 +13,16 @@ const handleFrameStream = (frameStream) => {
         while ((frame = frameStream.read()) !== null) {
             frames++;
 
-            // Validate syncword
+            // Syncword
             const syncword = frame.getUint16();
             if (syncword != 0x0b77) {
                 throw new Error(`Invalid syncword ${syncword.toString(16)}`);
             }
 
-            // Validate CRC
-            const crc = frame.getUint16();
-            // TODO: validate CRC
+            // Error Detection Code
+            const crc1 = frame.getUint16();
+            const crc2 = frame.slice(frame.byteLength - 2).getUint16();
+            // TODO: validate CRCs
 
             // Skip frame rate data
             frame.getInt8();
@@ -433,12 +434,6 @@ const handleFrameStream = (frameStream) => {
 
                 console.log(blk, audblk);
             }
-
-            // Auxiliary Data
-            // TODO
-
-            // Error Detection Code
-            // TODO
 
             global.test = global.test || 0;
             if (++test === 3) {
