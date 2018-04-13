@@ -1,6 +1,9 @@
 import through from 'through2';
 
+import {unpackExponents} from './exponents';
+
 const CHANNELS = [2, 1, 2, 3, 3, 4, 4, 5];
+const GROUP_SIZE = [0, 1, 2, 4];
 
 const handleFrameStream = (frameStream) => {
     let frames = 0;
@@ -234,11 +237,14 @@ const handleFrameStream = (frameStream) => {
                                 break;
                         }
 
-                        audblk.cplabsexp = frame.getUnsigned(4);
+                        const cplabsexp = frame.getUnsigned(4);
                         audblk.cplexps = new Array(audblk.ncplgrps);
                         for (let grp = 0; grp < audblk.ncplgrps; grp++) {
                             audblk.cplexps[grp] = frame.getUnsigned(7);
                         }
+
+                        // Unpack exponent groups
+                        audblk.cplexps = unpackExponents(audblk.cplexps, cplabsexp << 1, GROUP_SIZE[audblk.cplexpstr]);
                     }
                 }
 
@@ -257,7 +263,7 @@ const handleFrameStream = (frameStream) => {
                             audblk.endmant[ch] = 37 + (3 * (audblk.chbwcod[ch] + 12));
                         }
 
-                        switch (audblk.cplexpstr) {
+                        switch (audblk.chexpstr[ch]) {
                             case 0b01:
                                 audblk.nchgrps[ch] = ((audblk.endmant[ch] - 1) / 3) >> 0;
                                 break;
@@ -269,12 +275,14 @@ const handleFrameStream = (frameStream) => {
                                 break;
                         }
 
-                        audblk.exps[ch] = new Array(1 + audblk.nchgrps[ch]);
-                        audblk.exps[ch][0] = frame.getUnsigned(4);
-
+                        audblk.exps[ch] = new Array(audblk.nchgrps[ch]);
+                        const absexps = frame.getUnsigned(4);
                         for (let grp = 1; grp <= audblk.nchgrps[ch]; grp++) {
                             audblk.exps[ch][grp] = frame.getUnsigned(7);
                         }
+
+                        // Unpack exponent groups
+                        audblk.exps[ch] = unpackExponents(audblk.exps[ch], absexps, GROUP_SIZE[audblk.chexpstr[ch]]);
 
                         audblk.gainrng[ch] = frame.getUnsigned(2);
                     }
@@ -287,14 +295,16 @@ const handleFrameStream = (frameStream) => {
                         audblk.lfeendmant = 7;
 
                         audblk.nlfegrps = 2;
-                        audblk.lfeexps = new Array(1 + audblk.nlfegrps);
-                        audblk.lfeexps[0] = frame.getUnsigned(4);
+                        audblk.lfeexps = new Array(audblk.nlfegrps);
+
+                        const lfeabsexp = frame.getUnsigned(4);
+                        audblk.lfeexps[0] = frame.getUnsigned(7);
                         audblk.lfeexps[1] = frame.getUnsigned(7);
-                        audblk.lfeexps[2] = frame.getUnsigned(7);
+
+                        // Unpack exponent groups
+                        audblk.lfeexps = unpackExponents(audblk.lfeexps, lfeabsexp, GROUP_SIZE[audblk.lfeexpstr]);
                     }
                 }
-
-                // TODO: decode grouped exponents, see section 7.2
 
                 // Bit-allocation parametric information
                 audblk.baie = frame.getUnsigned(1);
@@ -381,6 +391,11 @@ const handleFrameStream = (frameStream) => {
                 }
 
                 // TODO: bit allocation, see section 7.3
+                // audblk.sdecay = SLOW_DECAY[audblk.sdcycod];
+                // audblk.fdecay = FAST_DECAY[audblk.fdcycod];
+                // audblk.sgain = SLOW_GAIN[audblk.sgaincod];
+                // audblk.dbknee = DB_PER_BIT[audblk.dbpbcod];
+                // audblk.floor = FLOOR[audblk.floorcod];
 
                 // Dummy data
                 if (frame.getUnsigned(1) !== 0) {
