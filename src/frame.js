@@ -95,12 +95,12 @@ const handleFrameStream = (frameStream) => {
 
                 // Block switch and dither flags
                 audblk.blksw = new Array(bsi.nfchans);
-                for (let i = 0; i < bsi.nfchans; i++) {
-                    audblk.blksw[i] = frame.getUnsigned(1);
+                for (let ch = 0; ch < bsi.nfchans; ch++) {
+                    audblk.blksw[ch] = frame.getUnsigned(1);
                 }
                 audblk.dithflag = new Array(bsi.nfchans);
-                for (let i = 0; i < bsi.nfchans; i++) {
-                    audblk.dithflag[i] = frame.getUnsigned(1);
+                for (let ch = 0; ch < bsi.nfchans; ch++) {
+                    audblk.dithflag[ch] = frame.getUnsigned(1);
                 }
 
                 // Dynamic range control
@@ -118,8 +118,8 @@ const handleFrameStream = (frameStream) => {
                     audblk.cplinu = frame.getUnsigned(1);
                     if (audblk.cplinu) {
                         audblk.chincpl = new Array(bsi.nfchans);
-                        for (let i = 0; i < bsi.nfchans; i++) {
-                            audblk.chincpl[i] = frame.getUnsigned(1);
+                        for (let ch = 0; ch < bsi.nfchans; ch++) {
+                            audblk.chincpl[ch] = frame.getUnsigned(1);
                         }
 
                         if (bsi.acmod === 0x2) {
@@ -132,11 +132,11 @@ const handleFrameStream = (frameStream) => {
                         audblk.ncplsubnd = 3 + audblk.cplbegf - audblk.cplendf;
                         audblk.ncplbnd = audblk.ncplsubnd;
                         audblk.cplbndstrc = new Array(audblk.ncplsubnd);
-                        for (let i = 0; i < audblk.ncplsubnd; i++) {
-                            audblk.cplbndstrc[i] = frame.getUnsigned(1);
+                        for (let bnd = 0; bnd < audblk.ncplsubnd; bnd++) {
+                            audblk.cplbndstrc[bnd] = frame.getUnsigned(1);
 
-                            if (i >= 1 && i < audblk.ncplsubnd) {
-                                audblk.ncplbnd -= audblk.cplbndstrc[i];
+                            if (bnd >= 1 && bnd < audblk.ncplsubnd) {
+                                audblk.ncplbnd -= audblk.cplbndstrc[bnd];
                             }
                         }
                     }
@@ -149,17 +149,17 @@ const handleFrameStream = (frameStream) => {
                     audblk.cplcoexp = new Array(bsi.nfchans);
                     audblk.cplcomant = new Array(bsi.nfchans);
 
-                    for (let i = 0; i < bsi.nfchans; i++) {
-                        if (audblk.chincpl[i]) {
-                            audblk.cplcoe[i] = frame.getUnsigned(1);
-                            if (audblk.cplcoe[i] !== 0) {
-                                audblk.mstrcplco[i] = frame.getUnsigned(2);
+                    for (let ch = 0; ch < bsi.nfchans; ch++) {
+                        if (audblk.chincpl[ch]) {
+                            audblk.cplcoe[ch] = frame.getUnsigned(1);
+                            if (audblk.cplcoe[ch] !== 0) {
+                                audblk.mstrcplco[ch] = frame.getUnsigned(2);
 
-                                audblk.cplcoexp[i] = new Array(audblk.ncplsubnd);
-                                audblk.cplcomant[i] = new Array(audblk.ncplsubnd);
+                                audblk.cplcoexp[ch] = new Array(audblk.ncplsubnd);
+                                audblk.cplcomant[ch] = new Array(audblk.ncplsubnd);
                                 for (let bnd = 0; bnd < audblk.ncplsubnd; bnd++) {
-                                    audblk.cplcoexp[i][bnd] = frame.getUnsigned(4);
-                                    audblk.cplcomant[i][bnd] = frame.getUnsigned(4);
+                                    audblk.cplcoexp[ch][bnd] = frame.getUnsigned(4);
+                                    audblk.cplcomant[ch][bnd] = frame.getUnsigned(4);
                                 }
                             }
                         }
@@ -194,10 +194,96 @@ const handleFrameStream = (frameStream) => {
                 }
 
                 // Exponent strategy
-                // TODO
+                if (audblk.cplinu) {
+                    audblk.cplexpstr = frame.getUnsigned(2);
 
-                // Exponents
-                // TODO
+                    audblk.chexpstr = new Array(bsi.nfchans);
+                    for (let ch = 0; ch < bsi.nfchans; ch++) {
+                        audblk.chexpstr[ch] = frame.getUnsigned(2);
+                    }
+
+                    if (audblk.lfeon) {
+                        audblk.lfeexpstr = frame.getUnsigned(1);
+                    }
+
+                    audblk.chbwcod = new Array(bsi.nfchans);
+                    for (let ch = 0; ch < bsi.nfchans; ch++) {
+                        if (audblk.chexpstr[ch] !== 0) {
+                            if (!audblk.chincpl[ch]) {
+                                audblk.chbwcod[ch] = frame.getUnsigned(6);
+                            }
+                        }
+                    }
+                }
+
+                // Exponents for the coupling channel
+                if (audblk.cplinu) {
+                    audblk.cplstrtmant = (audblk.cplbegf * 12) + 37;
+                    audblk.cplendmant = ((audblk.cplendf + 3) * 12) + 37;
+
+                    if (audblk.cplexpstr !== 0) {
+                        switch (audblk.cplexpstr) {
+                            case 0b01:
+                                audblk.ncplgrps = ((audblk.cplendmant - audblk.cplstrtmant) / 3) >> 0;
+                                break;
+                            case 0b10:
+                                audblk.ncplgrps = ((audblk.cplendmant - audblk.cplstrtmant) / 6) >> 0;
+                                break;
+                            case 0b11:
+                                audblk.ncplgrps = ((audblk.cplendmant - audblk.cplstrtmant) / 12) >> 0;
+                                break;
+                        }
+
+                        audblk.cplabsexp = frame.getUnsigned(4);
+                        audblk.cplexps = new Array(audblk.ncplgrps);
+                        for (let grp = 0; grp < audblk.ncplgrps; grp++) {
+                            audblk.cplexps[grp] = frame.getUnsigned(7);
+                        }
+                    }
+                }
+
+                // Exponents for full bandwidth channels
+                audblk.endmant = new Array(bsi.nfchans);
+                audblk.nchgrps = new Array(bsi.nfchans);
+                audblk.exps = new Array(bsi.nfchans);
+                audblk.gainrng = new Array(bsi.nfchans);
+                for (let ch = 0; ch < bsi.nfchans; ch++) {
+                    if (audblk.chexpstr[ch] !== 0) {
+                        audblk.endmant[ch] = ((audblk.chbwcod[ch] + 12) * 3) + 37;
+
+                        switch (audblk.cplexpstr) {
+                            case 0b01:
+                                audblk.nchgrps[ch] = ((audblk.endmant[ch] - 1) / 3) >> 0;
+                                break;
+                            case 0b10:
+                                audblk.nchgrps[ch] = ((audblk.endmant[ch] + 2) / 6) >> 0;
+                                break;
+                            case 0b11:
+                                audblk.nchgrps[ch] = ((audblk.endmant[ch] + 8) / 12) >> 0;
+                                break;
+                        }
+
+                        audblk.exps[ch] = new Array(1 + audblk.nchgrps[ch]);
+                        audblk.exps[ch][0] = frame.getUnsigned(4);
+
+                        for (let grp = 1; grp <= audblk.nchgrps[ch]; grp++) {
+                            audblk.exps[ch][grp] = frame.getUnsigned(7);
+                        }
+
+                        audblk.gainrng[ch] = frame.getUnsigned(2);
+                    }
+                }
+
+                // Exponents for the low frequency effects channel
+                if (audblk.lfeon) {
+                    if (audblk.lfeexpstr !== 0) {
+                        audblk.nlfegrps = 2;
+                        audblk.lfeexps = new Array(1 + audblk.nlfegrps);
+                        audblk.lfeexps[0] = frame.getUnsigned(4);
+                        audblk.lfeexps[1] = frame.getUnsigned(7);
+                        audblk.lfeexps[2] = frame.getUnsigned(7);
+                    }
+                }
 
                 // Parametric information
                 // TODO

@@ -37,7 +37,7 @@ const handleReadStream = (inputStream) => {
                     frameSize = 2 * bitRate;
                     break;
                 case 0b01:
-                    frameSize = Math.floor((320 * bitRate) / 147 + (frameSizeCode & 1));
+                    frameSize = ((320 * bitRate) / 147 + (frameSizeCode & 1)) >> 0;
                     break;
                 case 0b10:
                     frameSize = 3 * bitRate;
