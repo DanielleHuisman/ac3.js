@@ -152,7 +152,7 @@ const handleFrameStream = (frameStream) => {
                     for (let ch = 0; ch < bsi.nfchans; ch++) {
                         if (audblk.chincpl[ch]) {
                             audblk.cplcoe[ch] = frame.getUnsigned(1);
-                            if (audblk.cplcoe[ch] !== 0) {
+                            if (audblk.cplcoe[ch] !== 0x0) {
                                 audblk.mstrcplco[ch] = frame.getUnsigned(2);
 
                                 audblk.cplcoexp[ch] = new Array(audblk.ncplsubnd);
@@ -208,7 +208,7 @@ const handleFrameStream = (frameStream) => {
 
                     audblk.chbwcod = new Array(bsi.nfchans);
                     for (let ch = 0; ch < bsi.nfchans; ch++) {
-                        if (audblk.chexpstr[ch] !== 0) {
+                        if (audblk.chexpstr[ch] !== 0x0) {
                             if (!audblk.chincpl[ch]) {
                                 audblk.chbwcod[ch] = frame.getUnsigned(6);
                             }
@@ -221,7 +221,7 @@ const handleFrameStream = (frameStream) => {
                     audblk.cplstrtmant = (audblk.cplbegf * 12) + 37;
                     audblk.cplendmant = ((audblk.cplendf + 3) * 12) + 37;
 
-                    if (audblk.cplexpstr !== 0) {
+                    if (audblk.cplexpstr !== 0x0) {
                         switch (audblk.cplexpstr) {
                             case 0b01:
                                 audblk.ncplgrps = ((audblk.cplendmant - audblk.cplstrtmant) / 3) >> 0;
@@ -248,7 +248,7 @@ const handleFrameStream = (frameStream) => {
                 audblk.exps = new Array(bsi.nfchans);
                 audblk.gainrng = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
-                    if (audblk.chexpstr[ch] !== 0) {
+                    if (audblk.chexpstr[ch] !== 0x0) {
                         audblk.endmant[ch] = ((audblk.chbwcod[ch] + 12) * 3) + 37;
 
                         switch (audblk.cplexpstr) {
@@ -323,10 +323,56 @@ const handleFrameStream = (frameStream) => {
                 }
 
                 // Delta bit allocation information
-                // TODO
+                audblk.deltbaie = frame.getUnsigned(1);
+                if (audblk.deltbaie) {
+                    if (audblk.cplinu) {
+                        audblk.cpldeltbae = frame.getUnsigned(2);
+                    }
+
+                    audblk.deltbae = new Array(bsi.nfchans);
+                    for (let ch = 0; ch < bsi.nfchans; ch++) {
+                        audblk.deltbae[ch] = frame.getUnsigned(2);
+                    }
+
+                    if (audblk.cplinu) {
+                        if (audblk.cpldeltbae === 0x1) {
+                            audblk.cpldeltnseg = frame.getUnsigned(2);
+
+                            audblk.cpldeltoffst = new Array(audblk.cpldeltnseg + 1);
+                            audblk.cpldeltlen = new Array(audblk.cpldeltnseg + 1);
+                            audblk.cpldeltba = new Array(audblk.cpldeltnseg + 1);
+                            for (let seg = 0; seg <= audblk.cpldeltnseg; seg++) {
+                                audblk.cpldeltoffst[seg] = frame.getUnsigned(5);
+                                audblk.cpldeltlen[seg] = frame.getUnsigned(4);
+                                audblk.cpldeltba[seg] = frame.getUnsigned(3);
+                            }
+                        }
+                    }
+
+                    audblk.deltbae = new Array(bsi.nfchans);
+                    audblk.deltoffst = new Array(bsi.nfchans);
+                    audblk.deltlen = new Array(bsi.nfchans);
+                    audblk.deltba = new Array(bsi.nfchans);
+                    for (let ch = 0; ch < bsi.nfchans; ch++) {
+                        if (audblk.deltbae[ch] === 0x1) {
+                            audblk.deltnseg[ch] = frame.getUnsigned(2);
+
+                            audblk.deltoffst[ch] = new Array(audblk.deltnseg[ch] + 1);
+                            audblk.deltlen[ch] = new Array(audblk.deltnseg[ch] + 1);
+                            audblk.deltba[ch] = new Array(audblk.deltnseg[ch] + 1);
+                            for (let seg = 0; seg <= audblk.deltnseg[ch]; seg++) {
+                                audblk.deltoffst[ch][seg] = frame.getUnsigned(5);
+                                audblk.deltlen[ch][seg] = frame.getUnsigned(4);
+                                audblk.deltba[ch][seg] = frame.getUnsigned(3);
+                            }
+                        }
+                    }
+                }
 
                 // Dummy data
-                // TODO
+                if (frame.getUnsigned(1) !== 0) {
+                    frame.skip(frame.getUnsigned(9));
+                }
 
                 // Quantized mantissa values
                 // TODO
