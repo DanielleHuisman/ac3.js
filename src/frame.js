@@ -243,13 +243,19 @@ const handleFrameStream = (frameStream) => {
                 }
 
                 // Exponents for full bandwidth channels
+                audblk.strtmant = new Array(bsi.nfchans);
                 audblk.endmant = new Array(bsi.nfchans);
                 audblk.nchgrps = new Array(bsi.nfchans);
                 audblk.exps = new Array(bsi.nfchans);
                 audblk.gainrng = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
                     if (audblk.chexpstr[ch] !== 0x0) {
-                        audblk.endmant[ch] = ((audblk.chbwcod[ch] + 12) * 3) + 37;
+                        audblk.strtmant[ch] = 0;
+                        if (audblk.chincpl[ch]) {
+                            audblk.endmant[ch] = 37 + (12 * audblk.cplbegf);
+                        } else {
+                            audblk.endmant[ch] = 37 + (3 * (audblk.chbwcod[ch] + 12));
+                        }
 
                         switch (audblk.cplexpstr) {
                             case 0b01:
@@ -277,6 +283,9 @@ const handleFrameStream = (frameStream) => {
                 // Exponents for the low frequency effects channel
                 if (audblk.lfeon) {
                     if (audblk.lfeexpstr !== 0) {
+                        audblk.lfestartmant = 0;
+                        audblk.lfeendmant = 7;
+
                         audblk.nlfegrps = 2;
                         audblk.lfeexps = new Array(1 + audblk.nlfegrps);
                         audblk.lfeexps[0] = frame.getUnsigned(4);
@@ -284,6 +293,8 @@ const handleFrameStream = (frameStream) => {
                         audblk.lfeexps[2] = frame.getUnsigned(7);
                     }
                 }
+
+                // TODO: decode grouped exponents, see section 7.2
 
                 // Bit-allocation parametric information
                 audblk.baie = frame.getUnsigned(1);
@@ -369,13 +380,41 @@ const handleFrameStream = (frameStream) => {
                     }
                 }
 
+                // TODO: bit allocation, see section 7.3
+
                 // Dummy data
                 if (frame.getUnsigned(1) !== 0) {
                     frame.skip(frame.getUnsigned(9));
                 }
 
                 // Quantized mantissa values
-                // TODO
+                audblk.got_cplchan = 0;
+                audblk.chmant = new Array(bsi.nfchans);
+                for (let ch = 0; ch < bsi.nfchans; ch++) {
+                    audblk.chmant[ch] = new Array(audblk.endmant[ch]);
+                    for (let bin = 0; bin < audblk.endmant[ch]; bin++) {
+                        // TODO: required bit allocation pointers from section 7.3
+                        // audblk.chmant[ch][bin] = frame.getUnsigned(UNKNOWN);
+                    }
+
+                    if (audblk.cplinu && audblk.chincpl[ch] && !audblk.got_cplchan) {
+                        audblk.ncplmant = 12 * audblk.ncplsubnd;
+                        audblk.cplmant = new Array(audblk.ncplmant);
+                        for (let bin = 0; bin < audblk.ncplmant; bin++) {
+                            // TODO: required bit allocation pointers from section 7.3
+                            // audblk.cplmant[bin] = frame.getUnsigned(UNKNOWN);
+                        }
+                        audblk.got_cplchan = 1;
+                    }
+                }
+                if (audblk.lfeon) {
+                    audblk.nlfemant = 7;
+                    audblk.lfemant = new Array(audblk.nlfemant);
+                    for (let bin = 0; bin < audblk.nlfemant; bin++) {
+                        // TODO: required bit allocation pointers from section 7.3
+                        // audblk.lfemant[bin] = frame.getUnsigned(UNKNOWN);
+                    }
+                }
 
                 console.log(blk, audblk);
             }
