@@ -1,5 +1,6 @@
 import through from 'through2';
 
+import {EXP_REUSE, EXP_D15, EXP_D25, EXP_D45} from './constants';
 import {unpackExponents} from './exponents';
 
 const CHANNELS = [2, 1, 2, 3, 3, 4, 4, 5];
@@ -156,7 +157,7 @@ const handleFrameStream = (frameStream) => {
                     for (let ch = 0; ch < bsi.nfchans; ch++) {
                         if (audblk.chincpl[ch]) {
                             audblk.cplcoe[ch] = frame.getUnsigned(1);
-                            if (audblk.cplcoe[ch] !== 0x0) {
+                            if (audblk.cplcoe[ch]) {
                                 audblk.mstrcplco[ch] = frame.getUnsigned(2);
 
                                 audblk.cplcoexp[ch] = new Array(audblk.ncplsubnd);
@@ -212,7 +213,7 @@ const handleFrameStream = (frameStream) => {
 
                     audblk.chbwcod = new Array(bsi.nfchans);
                     for (let ch = 0; ch < bsi.nfchans; ch++) {
-                        if (audblk.chexpstr[ch] !== 0x0) {
+                        if (audblk.chexpstr[ch] !== EXP_REUSE) {
                             if (!audblk.chincpl[ch]) {
                                 audblk.chbwcod[ch] = frame.getUnsigned(6);
                             }
@@ -225,15 +226,15 @@ const handleFrameStream = (frameStream) => {
                     audblk.cplstrtmant = (audblk.cplbegf * 12) + 37;
                     audblk.cplendmant = ((audblk.cplendf + 3) * 12) + 37;
 
-                    if (audblk.cplexpstr !== 0x0) {
+                    if (audblk.cplexpstr !== EXP_REUSE) {
                         switch (audblk.cplexpstr) {
-                            case 0b01:
+                            case EXP_D15:
                                 audblk.ncplgrps = ((audblk.cplendmant - audblk.cplstrtmant) / 3) >> 0;
                                 break;
-                            case 0b10:
+                            case EXP_D25:
                                 audblk.ncplgrps = ((audblk.cplendmant - audblk.cplstrtmant) / 6) >> 0;
                                 break;
-                            case 0b11:
+                            case EXP_D45:
                                 audblk.ncplgrps = ((audblk.cplendmant - audblk.cplstrtmant) / 12) >> 0;
                                 break;
                         }
@@ -256,7 +257,7 @@ const handleFrameStream = (frameStream) => {
                 audblk.exps = new Array(bsi.nfchans);
                 audblk.gainrng = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
-                    if (audblk.chexpstr[ch] !== 0x0) {
+                    if (audblk.chexpstr[ch] !== EXP_REUSE) {
                         audblk.strtmant[ch] = 0;
                         if (audblk.chincpl[ch]) {
                             audblk.endmant[ch] = 37 + (12 * audblk.cplbegf);
@@ -265,13 +266,13 @@ const handleFrameStream = (frameStream) => {
                         }
 
                         switch (audblk.chexpstr[ch]) {
-                            case 0b01:
+                            case EXP_D15:
                                 audblk.nchgrps[ch] = ((audblk.endmant[ch] - 1) / 3) >> 0;
                                 break;
-                            case 0b10:
+                            case EXP_D25:
                                 audblk.nchgrps[ch] = ((audblk.endmant[ch] + 2) / 6) >> 0;
                                 break;
-                            case 0b11:
+                            case EXP_D45:
                                 audblk.nchgrps[ch] = ((audblk.endmant[ch] + 8) / 12) >> 0;
                                 break;
                         }
@@ -291,7 +292,7 @@ const handleFrameStream = (frameStream) => {
 
                 // Exponents for the low frequency effects channel
                 if (audblk.lfeon) {
-                    if (audblk.lfeexpstr !== 0) {
+                    if (audblk.lfeexpstr !== EXP_REUSE) {
                         audblk.lfestartmant = 0;
                         audblk.lfeendmant = 7;
 
