@@ -92,6 +92,14 @@ const handleFrameStream = (frameStream) => {
 
             console.log(bsi);
 
+            const params = {
+                slowDecay: 0,
+                fastDecay: 0,
+                slowGain: 0,
+                dbPerBit: 0,
+                floor: 0
+            };
+
             // Audio Blocks
             const audblks = new Array(6);
             for (let blk = 0; blk < 6; blk++) {
@@ -410,7 +418,7 @@ const handleFrameStream = (frameStream) => {
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
                     audblk.chmant[ch] = new Array(audblk.endmant[ch]);
                     for (let bin = 0; bin < audblk.endmant[ch]; bin++) {
-                        // TODO: required bit allocation pointers from section 7.3
+                        // TODO: requires bit allocation pointers from section 7.3
                         // audblk.chmant[ch][bin] = frame.getUnsigned(UNKNOWN);
                     }
 
@@ -418,7 +426,7 @@ const handleFrameStream = (frameStream) => {
                         audblk.ncplmant = 12 * audblk.ncplsubnd;
                         audblk.cplmant = new Array(audblk.ncplmant);
                         for (let bin = 0; bin < audblk.ncplmant; bin++) {
-                            // TODO: required bit allocation pointers from section 7.3
+                            // TODO: requires bit allocation pointers from section 7.3
                             // audblk.cplmant[bin] = frame.getUnsigned(UNKNOWN);
                         }
                         audblk.got_cplchan = 1;
@@ -428,7 +436,7 @@ const handleFrameStream = (frameStream) => {
                     audblk.nlfemant = 7;
                     audblk.lfemant = new Array(audblk.nlfemant);
                     for (let bin = 0; bin < audblk.nlfemant; bin++) {
-                        // TODO: required bit allocation pointers from section 7.3
+                        // TODO: requires bit allocation pointers from section 7.3
                         // audblk.lfemant[bin] = frame.getUnsigned(UNKNOWN);
                     }
                 }
