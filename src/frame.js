@@ -34,7 +34,7 @@ const handleFrameStream = (frameStream) => {
             bsi.bsid = frame.getUnsigned(5);
             bsi.bsmod = frame.getUnsigned(3);
 
-            if (bsi.bsid !== 0x8) {
+            if (bsi.bsid !== 0x8 && bsi.bsid !== 0x6) {
                 throw new Error(`Invalid bsid ${bsi.bsid.toString(2)}`);
             }
 
