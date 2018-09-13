@@ -127,10 +127,10 @@ const handleFrameStream = (frameStream) => {
                 }
 
                 // Coupling strategy information
+                audblk.chincpl = new Array(bsi.nfchans);
                 if (frame.getUnsigned(1) !== 0) {
                     audblk.cplinu = frame.getUnsigned(1);
                     if (audblk.cplinu) {
-                        audblk.chincpl = new Array(bsi.nfchans);
                         for (let ch = 0; ch < bsi.nfchans; ch++) {
                             audblk.chincpl[ch] = frame.getUnsigned(1);
                         }
@@ -142,7 +142,7 @@ const handleFrameStream = (frameStream) => {
                         audblk.cplbegf = frame.getUnsigned(4);
                         audblk.cplendf = frame.getUnsigned(4);
 
-                        audblk.ncplsubnd = 3 + audblk.cplbegf - audblk.cplendf;
+                        audblk.ncplsubnd = 3 + audblk.cplendf - audblk.cplbegf;
                         audblk.ncplbnd = audblk.ncplsubnd;
                         audblk.cplbndstrc = new Array(audblk.ncplsubnd);
                         for (let bnd = 0; bnd < audblk.ncplsubnd; bnd++) {
@@ -201,7 +201,7 @@ const handleFrameStream = (frameStream) => {
 
                         audblk.rematflg = new Array(bands);
                         for (let rbnd = 0; rbnd < bands; rbnd++) {
-                            audblk.rematflg[rbnd]
+                            audblk.rematflg[rbnd] = frame.getUnsigned(1);
                         }
                     }
                 }
@@ -209,22 +209,22 @@ const handleFrameStream = (frameStream) => {
                 // Exponent strategy
                 if (audblk.cplinu) {
                     audblk.cplexpstr = frame.getUnsigned(2);
+                }
 
-                    audblk.chexpstr = new Array(bsi.nfchans);
-                    for (let ch = 0; ch < bsi.nfchans; ch++) {
-                        audblk.chexpstr[ch] = frame.getUnsigned(2);
-                    }
+                audblk.chexpstr = new Array(bsi.nfchans);
+                for (let ch = 0; ch < bsi.nfchans; ch++) {
+                    audblk.chexpstr[ch] = frame.getUnsigned(2);
+                }
 
-                    if (audblk.lfeon) {
-                        audblk.lfeexpstr = frame.getUnsigned(1);
-                    }
+                if (audblk.lfeon) {
+                    audblk.lfeexpstr = frame.getUnsigned(1);
+                }
 
-                    audblk.chbwcod = new Array(bsi.nfchans);
-                    for (let ch = 0; ch < bsi.nfchans; ch++) {
-                        if (audblk.chexpstr[ch] !== EXP_REUSE) {
-                            if (!audblk.chincpl[ch]) {
-                                audblk.chbwcod[ch] = frame.getUnsigned(6);
-                            }
+                audblk.chbwcod = new Array(bsi.nfchans);
+                for (let ch = 0; ch < bsi.nfchans; ch++) {
+                    if (audblk.chexpstr[ch] !== EXP_REUSE) {
+                        if (!audblk.chincpl[ch]) {
+                            audblk.chbwcod[ch] = frame.getUnsigned(6);
                         }
                     }
                 }
