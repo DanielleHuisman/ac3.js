@@ -30,15 +30,20 @@ function calc_lowcomp(a, b0, b1, bin) {
     return a;
 }
 
-export const bitAllocate = (audblk, start, end, exp, fastleak, slowleak) => {
+export const bitAllocation = (audblk, start, end, exp, fgain, snroffset, fastleak, slowleak) => {
+    let bndstrt = MASKTAB[start];
+    let bndend = MASKTAB[end - 1] + 1;
     let psd = new Array(end);
-    
+    let bndpsd = new Array(bndend);
+    let excite = new Array(bndend);
+    let mask = new Array(bndend);
+
     for (let bin = start; bin < end; bin++) {
         psd[bin] = 3072 - (exp[bin] << 7);
     }
 
     let j = start;
-    let k = MASKTAB[start];
+    let k = bndstrt;
     let lastbin;
 
     do {
@@ -52,12 +57,10 @@ export const bitAllocate = (audblk, start, end, exp, fastleak, slowleak) => {
         k++;
     } while (end > lastbin);
 
-    let bndstrt = MASKTAB[start];
-    let bndend = MASKTAB[end - 1] + 1;
     let begin;
 
     if (bndstrt === 0) {
-        lowcomp = calc_lowcomp(lowcomp, bndpsd[0], bndpsd[1], 0);
+        let lowcomp = calc_lowcomp(lowcomp, bndpsd[0], bndpsd[1], 0);
         excite[0] = bndpsd[0] - fgain - lowcomp;
         lowcomp = calc_lowcomp(lowcomp, bndpsd[1], bndpsd[2], 1);
         excite[1] = bndpsd[1] - fgain - lowcomp;
@@ -67,8 +70,8 @@ export const bitAllocate = (audblk, start, end, exp, fastleak, slowleak) => {
             if ((bndend !== 7) || (bin !== 6)) {
                 lowcomp = calc_lowcomp(lowcomp, bndpsd[bin], bndpsd[bin +1 ], bin);
             }
-            fastleak = bndpsd[bin] - fgain;
-            slowleak = bndpsd[bin] - sgain;
+            fastleak = bndpsd[bin] - audblk.fgain;
+            slowleak = bndpsd[bin] - audblk.sgain;
             excite[bin] = fastleak - lowcomp;
             if ((bndend !== 7) || (bin !== 6)) {
                 if (bndpsd[bin] <= bndpsd[bin + 1]) {
@@ -82,10 +85,10 @@ export const bitAllocate = (audblk, start, end, exp, fastleak, slowleak) => {
             if ((bndend !== 7) || (bin !== 6)) {
                 lowcomp = calc_lowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
             }
-            fastleak -= fdecay;
-            faskleak = max(fastleak, bndpsd[bin] - fgain);
-            slowleak -= sdecay;
-            slowleak = max(slowleak, bndpsd[bin] - sgain);
+            fastleak -= audblk.fdecay;
+            faskleak = max(fastleak, bndpsd[bin] - audblk.fgain);
+            slowleak -= audblk.sdecay;
+            slowleak = max(slowleak, bndpsd[bin] - audblk.sgain);
             excite[bin] = max(fastleak - lowcomp, slowleak);
         }
     
@@ -95,16 +98,16 @@ export const bitAllocate = (audblk, start, end, exp, fastleak, slowleak) => {
     }
 
     for (let bin = begin; bin < bndend; bin++) {
-        fastleak -= fdecay;
-        faskleak = max(fastleak, bndpsd[bin] - fgain);
-        slowleak -= sdecay;
-        slowleak = max(slowleak, bndpsd[bin] - sgain);
+        fastleak -= audblk.fdecay;
+        faskleak = max(fastleak, bndpsd[bin] - audblk.fgain);
+        slowleak -= audblk.sdecay;
+        slowleak = max(slowleak, bndpsd[bin] - audblk.sgain);
         excite[bin] = max(fastleak, slowleak);
     }
 
     for (let bin = bndstrt; bin < bndend; bin++) {
-        if (bndpsd[bin] < dbknee) {
-            excite[bin] += ((dbknee - bndpsd[bin]) >> 2);
+        if (bndpsd[bin] < audblk.dbknee) {
+            excite[bin] += ((audblk.dbknee - bndpsd[bin]) >> 2);
         }
         mask[bin] = max(excite[bin], HTH[audblk.fscod][bin]);
     }
@@ -131,12 +134,12 @@ export const bitAllocate = (audblk, start, end, exp, fastleak, slowleak) => {
     do {
         lastbin = min(BNDTAB[j] + BNDSZ[j], end);
         mask[j] -= snroffset;
-        mask[j] -= floor;
+        mask[j] -= audblk.floor;
         if (mask[j] < 0) {
             mask[j] = 0;
         }
         mask[j] &= 0x1fe0;
-        mask[j] += floor;
+        mask[j] += audblk.floor;
         for (let k = i; k < lastbin; k++) {
             let address = (psd[i] - mask[j]) >> 5 ;
             address = min(63, max(0, address));
