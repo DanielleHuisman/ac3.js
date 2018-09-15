@@ -1,8 +1,8 @@
-import { BNDTAB, BNDSZ, LATAB, MASKTAB } from "./tables";
+import { BNDTAB, BNDSZ, LATAB, MASKTAB, HTH } from "./tables";
 
 function logadd(a, b) {
     let c = a - b;
-    let address = min(abs(c) >> 1, 255);
+    let address = Math.min(Math.abs(c) >> 1, 255);
     if (c >= 0) {
         return (a + LATAB[address]);
     } else {
@@ -15,16 +15,16 @@ function calc_lowcomp(a, b0, b1, bin) {
         if ((b0 + 256) === b1) {
             a = 384;
         } else if (b0 > b1) {
-            a = max(0, a - 64);
+            a = Math.max(0, a - 64);
         }
     } else if (bin < 20) {
         if ((b0 + 256) === b1) {
             a = 320;
         } else if (b0 > b1) {
-            a = max(0, a - 64);
+            a = Math.max(0, a - 64);
         }
     } else {
-        a = max(0, a - 128) ;
+        a = Math.max(0, a - 128) ;
     }
 
     return a;
@@ -47,7 +47,7 @@ export const bitAllocation = (audblk, start, end, exp, fgain, snroffset, fastlea
     let lastbin;
 
     do {
-        lastbin = min(BNDTAB[k] + BNDSZ[k], end);
+        lastbin = Math.min(BNDTAB[k] + BNDSZ[k], end);
         bndpsd[k] = psd[j];
         j++;
         for (let i = j; i < lastbin; i++) {
@@ -81,15 +81,15 @@ export const bitAllocation = (audblk, start, end, exp, fgain, snroffset, fastlea
             }
         }
     
-        for (let bin = begin; bin < min(bndend, 22); bin++) {
+        for (let bin = begin; bin < Math.min(bndend, 22); bin++) {
             if ((bndend !== 7) || (bin !== 6)) {
                 lowcomp = calc_lowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
             }
             fastleak -= audblk.fdecay;
-            faskleak = max(fastleak, bndpsd[bin] - audblk.fgain);
+            fastleak = Math.max(fastleak, bndpsd[bin] - audblk.fgain);
             slowleak -= audblk.sdecay;
-            slowleak = max(slowleak, bndpsd[bin] - audblk.sgain);
-            excite[bin] = max(fastleak - lowcomp, slowleak);
+            slowleak = Math.max(slowleak, bndpsd[bin] - audblk.sgain);
+            excite[bin] = Math.max(fastleak - lowcomp, slowleak);
         }
     
         begin = 22;
@@ -99,17 +99,17 @@ export const bitAllocation = (audblk, start, end, exp, fgain, snroffset, fastlea
 
     for (let bin = begin; bin < bndend; bin++) {
         fastleak -= audblk.fdecay;
-        faskleak = max(fastleak, bndpsd[bin] - audblk.fgain);
+        fastleak = Math.max(fastleak, bndpsd[bin] - audblk.fgain);
         slowleak -= audblk.sdecay;
-        slowleak = max(slowleak, bndpsd[bin] - audblk.sgain);
-        excite[bin] = max(fastleak, slowleak);
+        slowleak = Math.max(slowleak, bndpsd[bin] - audblk.sgain);
+        excite[bin] = Math.max(fastleak, slowleak);
     }
 
     for (let bin = bndstrt; bin < bndend; bin++) {
         if (bndpsd[bin] < audblk.dbknee) {
             excite[bin] += ((audblk.dbknee - bndpsd[bin]) >> 2);
         }
-        mask[bin] = max(excite[bin], HTH[audblk.fscod][bin]);
+        mask[bin] = Math.max(excite[bin], HTH[audblk.fscod][bin]);
     }
 
     if (audblk.deltbae === 0 || audblk.deltbae === 1) {
@@ -132,7 +132,7 @@ export const bitAllocation = (audblk, start, end, exp, fgain, snroffset, fastlea
     let i = start;
     j = MASKTAB[start];
     do {
-        lastbin = min(BNDTAB[j] + BNDSZ[j], end);
+        lastbin = Math.min(BNDTAB[j] + BNDSZ[j], end);
         mask[j] -= snroffset;
         mask[j] -= audblk.floor;
         if (mask[j] < 0) {
@@ -142,7 +142,7 @@ export const bitAllocation = (audblk, start, end, exp, fgain, snroffset, fastlea
         mask[j] += audblk.floor;
         for (let k = i; k < lastbin; k++) {
             let address = (psd[i] - mask[j]) >> 5 ;
-            address = min(63, max(0, address));
+            address = Math.min(63, Math.max(0, address));
             bap[i] = BAPTAB[address];
             i++;
         }

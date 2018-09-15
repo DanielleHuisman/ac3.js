@@ -2,8 +2,8 @@ import through from 'through2';
 
 import {EXP_REUSE, EXP_D15, EXP_D25, EXP_D45} from './constants';
 import {unpackExponents} from './exponents';
-import { FAST_GAIN } from './tables';
-import { bitAllocate } from './bitallocation';
+import { FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR } from './tables';
+import { bitAllocation } from './bitallocation';
 
 const CHANNELS = [2, 1, 2, 3, 3, 4, 4, 5];
 const GROUP_SIZE = [0, 1, 2, 4];
@@ -147,12 +147,9 @@ const handleFrameStream = (frameStream) => {
                         audblk.ncplsubnd = 3 + audblk.cplendf - audblk.cplbegf;
                         audblk.ncplbnd = audblk.ncplsubnd;
                         audblk.cplbndstrc = new Array(audblk.ncplsubnd);
-                        for (let bnd = 0; bnd < audblk.ncplsubnd; bnd++) {
+                        for (let bnd = 1; bnd < audblk.ncplsubnd; bnd++) {
                             audblk.cplbndstrc[bnd] = frame.getUnsigned(1);
-
-                            if (bnd >= 1 && bnd < audblk.ncplsubnd) {
-                                audblk.ncplbnd -= audblk.cplbndstrc[bnd];
-                            }
+                            audblk.ncplbnd -= audblk.cplbndstrc[bnd];
                         }
                     }
                 }
@@ -170,9 +167,9 @@ const handleFrameStream = (frameStream) => {
                             if (audblk.cplcoe[ch]) {
                                 audblk.mstrcplco[ch] = frame.getUnsigned(2);
 
-                                audblk.cplcoexp[ch] = new Array(audblk.ncplsubnd);
-                                audblk.cplcomant[ch] = new Array(audblk.ncplsubnd);
-                                for (let bnd = 0; bnd < audblk.ncplsubnd; bnd++) {
+                                audblk.cplcoexp[ch] = new Array(audblk.ncplbnd);
+                                audblk.cplcomant[ch] = new Array(audblk.ncplbnd);
+                                for (let bnd = 0; bnd < audblk.ncplbnd; bnd++) {
                                     audblk.cplcoexp[ch][bnd] = frame.getUnsigned(4);
                                     audblk.cplcomant[ch][bnd] = frame.getUnsigned(4);
                                 }
@@ -218,7 +215,7 @@ const handleFrameStream = (frameStream) => {
                     audblk.chexpstr[ch] = frame.getUnsigned(2);
                 }
 
-                if (audblk.lfeon) {
+                if (bsi.lfeon) {
                     audblk.lfeexpstr = frame.getUnsigned(1);
                 }
 
@@ -301,7 +298,7 @@ const handleFrameStream = (frameStream) => {
                 }
 
                 // Exponents for the low frequency effects channel
-                if (audblk.lfeon) {
+                if (bsi.lfeon) {
                     if (audblk.lfeexpstr !== EXP_REUSE) {
                         audblk.lfestartmant = 0;
                         audblk.lfeendmant = 7;
@@ -342,7 +339,7 @@ const handleFrameStream = (frameStream) => {
                         audblk.fgaincod[ch] = frame.getUnsigned(3);
                     }
 
-                    if (audblk.lfeon) {
+                    if (bsi.lfeon) {
                         audblk.lfefsnroffst = frame.getUnsigned(4);
                         audblk.lfefgaincod = frame.getUnsigned(3);
                     }
@@ -422,7 +419,7 @@ const handleFrameStream = (frameStream) => {
                         if (audblk.chincpl[ch]) {
                             audblk.baps[ch] = bitAllocation(audblk, audblk.cplstrtmant,
                                 audblk.cplendmant, audblk.exps[ch], FAST_GAIN[audblk.cplfgaincod],
-                                (((csnroffst - 15) << 4) + cplfsnroffst) << 2,
+                                (((audblk.csnroffst - 15) << 4) + audblk.cplfsnroffst) << 2,
                                 (audblk.cplfleak << 8) + 768, (audblk.cplsleak << 8) + 768);
                         } else {
                             audblk.baps[ch] = bitAllocation(audblk, 0,
@@ -431,10 +428,10 @@ const handleFrameStream = (frameStream) => {
                         }
                     }
                 }
-                if (audblk.lfeon) {
+                if (bsi.lfeon) {
                     audblk.lfebap = bitAllocation(audblk, audblk.lfestartmant,
                         audblk.lfeendmant, audblk.lfeexps, FAST_GAIN[audblk.lfefgaincod],
-                        (((csnroffst - 15) << 4) + lfefsnroffst) << 2, 0, 0);
+                        (((audblk.csnroffst - 15) << 4) + audblk.lfefsnroffst) << 2, 0, 0);
                 }
 
                 // Dummy data
@@ -462,7 +459,7 @@ const handleFrameStream = (frameStream) => {
                         audblk.got_cplchan = 1;
                     }
                 }
-                if (audblk.lfeon) {
+                if (bsi.lfeon) {
                     audblk.nlfemant = 7;
                     audblk.lfemant = new Array(audblk.nlfemant);
                     for (let bin = 0; bin < audblk.nlfemant; bin++) {
