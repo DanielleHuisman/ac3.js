@@ -40,7 +40,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
     let lowcomp = 0;
 
     for (let bin = start; bin < end; bin++) {
-        psd[bin] = 3072 - (exp[bin] << 7);
+        psd[bin] = 3072 - (exp[bin - start] << 7);
     }
 
     let j = start;
