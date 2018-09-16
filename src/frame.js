@@ -104,6 +104,14 @@ const handleFrameStream = (frameStream) => {
 
             // Audio Blocks
             let audblk = {};
+            audblk.blksw = new Array(bsi.nfchans);
+            audblk.dithflag = new Array(bsi.nfchans);
+            audblk.chincpl = new Array(bsi.nfchans);
+            audblk.mstrcplco = new Array(bsi.nfchans);
+            audblk.cplcoe = new Array(bsi.nfchans);
+            audblk.cplcoexp = new Array(bsi.nfchans);
+            audblk.cplcomant = new Array(bsi.nfchans);
+            audblk.chexpstr = new Array(bsi.nfchans);
             audblk.strtmant = new Array(bsi.nfchans);
             audblk.endmant = new Array(bsi.nfchans);
             audblk.nchgrps = new Array(bsi.nfchans);
@@ -113,11 +121,9 @@ const handleFrameStream = (frameStream) => {
             let mantissas = new MantissaReader(frame);
             for (let blk = 0; blk < 6; blk++) {
                 // Block switch and dither flags
-                audblk.blksw = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
                     audblk.blksw[ch] = frame.getUnsigned(1);
                 }
-                audblk.dithflag = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
                     audblk.dithflag[ch] = frame.getUnsigned(1);
                 }
@@ -133,7 +139,6 @@ const handleFrameStream = (frameStream) => {
                 }
 
                 // Coupling strategy information
-                audblk.chincpl = new Array(bsi.nfchans);
                 if (frame.getUnsigned(1) !== 0) {
                     audblk.cplinu = frame.getUnsigned(1);
                     if (audblk.cplinu) {
@@ -160,11 +165,6 @@ const handleFrameStream = (frameStream) => {
 
                 // Coupling coordinates and phase flags
                 if (audblk.cplinu) {
-                    audblk.mstrcplco = new Array(bsi.nfchans);
-                    audblk.cplcoe = new Array(bsi.nfchans);
-                    audblk.cplcoexp = new Array(bsi.nfchans);
-                    audblk.cplcomant = new Array(bsi.nfchans);
-
                     for (let ch = 0; ch < bsi.nfchans; ch++) {
                         if (audblk.chincpl[ch]) {
                             audblk.cplcoe[ch] = frame.getUnsigned(1);
@@ -214,7 +214,6 @@ const handleFrameStream = (frameStream) => {
                     audblk.cplexpstr = frame.getUnsigned(2);
                 }
 
-                audblk.chexpstr = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
                     audblk.chexpstr[ch] = frame.getUnsigned(2);
                 }
