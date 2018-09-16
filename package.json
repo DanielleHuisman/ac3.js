@@ -3,7 +3,10 @@
   "description": "JavaScript ATSC A/52 (AC-3) decoder",
   "version": "1.0.0",
   "license": "MIT",
-  "author": "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
+  "contributors": [
+    "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
+    "Karl Koscher <supersat@cs.washington.edu> (https://homes.cs.washington.edu/~supersat/)"
+  ],
   "repository": "github:DanielHuisman/a52.js",
   "keywords": [
     "atsc",
