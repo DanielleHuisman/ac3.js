@@ -37,6 +37,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
     let bndpsd = new Array(bndend);
     let excite = new Array(bndend);
     let mask = new Array(bndend);
+    let lowcomp = 0;
 
     for (let bin = start; bin < end; bin++) {
         psd[bin] = 3072 - (exp[bin] << 7);
@@ -60,7 +61,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
     let begin;
 
     if (bndstrt === 0) {
-        let lowcomp = calc_lowcomp(lowcomp, bndpsd[0], bndpsd[1], 0);
+        lowcomp = calc_lowcomp(lowcomp, bndpsd[0], bndpsd[1], 0);
         excite[0] = bndpsd[0] - fgain - lowcomp;
         lowcomp = calc_lowcomp(lowcomp, bndpsd[1], bndpsd[2], 1);
         excite[1] = bndpsd[1] - fgain - lowcomp;
@@ -68,9 +69,9 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
     
         for (let bin = 2; bin < 7; bin++) {
             if ((bndend !== 7) || (bin !== 6)) {
-                lowcomp = calc_lowcomp(lowcomp, bndpsd[bin], bndpsd[bin +1 ], bin);
+                lowcomp = calc_lowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
             }
-            fastleak = bndpsd[bin] - audblk.fgain;
+            fastleak = bndpsd[bin] - fgain;
             slowleak = bndpsd[bin] - audblk.sgain;
             excite[bin] = fastleak - lowcomp;
             if ((bndend !== 7) || (bin !== 6)) {
@@ -86,7 +87,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
                 lowcomp = calc_lowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
             }
             fastleak -= audblk.fdecay;
-            fastleak = Math.max(fastleak, bndpsd[bin] - audblk.fgain);
+            fastleak = Math.max(fastleak, bndpsd[bin] - fgain);
             slowleak -= audblk.sdecay;
             slowleak = Math.max(slowleak, bndpsd[bin] - audblk.sgain);
             excite[bin] = Math.max(fastleak - lowcomp, slowleak);
@@ -99,7 +100,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
 
     for (let bin = begin; bin < bndend; bin++) {
         fastleak -= audblk.fdecay;
-        fastleak = Math.max(fastleak, bndpsd[bin] - audblk.fgain);
+        fastleak = Math.max(fastleak, bndpsd[bin] - fgain);
         slowleak -= audblk.sdecay;
         slowleak = Math.max(slowleak, bndpsd[bin] - audblk.sgain);
         excite[bin] = Math.max(fastleak, slowleak);
