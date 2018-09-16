@@ -111,6 +111,7 @@ const handleFrameStream = (frameStream) => {
             audblk.cplcoe = new Array(bsi.nfchans);
             audblk.cplcoexp = new Array(bsi.nfchans);
             audblk.cplcomant = new Array(bsi.nfchans);
+            audblk.cplco = new Array(bsi.nfchans);
             audblk.chexpstr = new Array(bsi.nfchans);
             audblk.strtmant = new Array(bsi.nfchans);
             audblk.endmant = new Array(bsi.nfchans);
@@ -174,11 +175,21 @@ const handleFrameStream = (frameStream) => {
 
                                 audblk.cplcoexp[ch] = new Array(audblk.ncplbnd);
                                 audblk.cplcomant[ch] = new Array(audblk.ncplbnd);
+                                audblk.cplco[ch] = new Array(audblk.ncplbnd);
                                 for (let bnd = 0; bnd < audblk.ncplbnd; bnd++) {
                                     audblk.cplcoexp[ch][bnd] = frame.getUnsigned(4);
                                     audblk.cplcomant[ch][bnd] = frame.getUnsigned(4);
                                 }
                             }
+
+                            let cplco;
+                            if (audblk.cplcoexp[ch][bnd] === 15) {
+                                cplco = audblk.cplcomant[ch][bnd] / 16;
+                            } else {
+                                cplco = (audblk.cplcomant[ch][bnd] + 16) / 32;
+                            }
+                            audblk.cplco[ch][bnd] = cplco / Math.pow(2,
+                                audblk.cplcoexp[ch][bnd] + 3 * audblk.mstrcplco[ch]);
                         }
                     }
 
@@ -465,6 +476,21 @@ const handleFrameStream = (frameStream) => {
                     for (let bin = 0; bin < audblk.nlfemant; bin++) {
                         audblk.lfemant[bin] = mantissas.get(audblk.lfebap[bin]) *
                             Math.pow(2, -audblk.lfeexps[bin]);
+                    }
+                }
+
+                // Decouple channels
+                if (audblk.cplinu) {
+                    for (let ch = 0; ch < bsi.nfchans; ch++) {
+                        if (audblk.chincpl[ch]) {
+                            for (let sbnd = cplbegf; sbnd < 3 + audblk.cplendf; sbnd++) {
+                                for (let bin = 0; bin < 12; bin++) {
+                                    audblk.chmant[ch][sbnd * 12 + bin + 37] =
+                                        audblk.cplmant[(sbnd - cplbegf) * 12 + bin + 37] *
+                                        audblk.cplco[ch][bnd] * 8;
+                                }
+                            }
+                        }
                     }
                 }
 
