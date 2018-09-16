@@ -6,7 +6,7 @@ JavaScript ATSC A/52 (AC-3) decoder
 - [x] `syncframe`
     - [x] `syncinfo`
     - [x] `bsi`
-    - [ ] `audblk`
+    - [x] `audblk`
     - [x] `auxdata`
     - [x] `errorcheck`
 
@@ -17,8 +17,8 @@ JavaScript ATSC A/52 (AC-3) decoder
 - [x] Unpack BSI
 - [x] Unpack Side Information
 - [x] Decode Exponents
-- [ ] Bit Allocation
-- [ ] Process Mantissas
+- [x] Bit Allocation
+- [x] Process Mantissas
 - [ ] Decoupling
 - [ ] Rematrixing
 - [ ] Inverse Transform
