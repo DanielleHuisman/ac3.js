@@ -132,7 +132,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
 
     let bap = new Array(end);
     let i = start;
-    j = MASKTAB[start];
+    j = bndstrt;
     do {
         lastbin = Math.min(BNDTAB[j] + BNDSZ[j], end);
         mask[j] -= snroffset;

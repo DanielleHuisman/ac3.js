@@ -349,13 +349,13 @@ const handleFrameStream = (frameStream) => {
                 }
 
                 // Delta bit allocation information
+                audblk.deltbae = new Array(bsi.nfchans);
                 audblk.deltbaie = frame.getUnsigned(1);
                 if (audblk.deltbaie) {
                     if (audblk.cplinu) {
                         audblk.cpldeltbae = frame.getUnsigned(2);
                     }
 
-                    audblk.deltbae = new Array(bsi.nfchans);
                     for (let ch = 0; ch < bsi.nfchans; ch++) {
                         audblk.deltbae[ch] = frame.getUnsigned(2);
                     }
@@ -375,7 +375,6 @@ const handleFrameStream = (frameStream) => {
                         }
                     }
 
-                    audblk.deltbae = new Array(bsi.nfchans);
                     audblk.deltoffst = new Array(bsi.nfchans);
                     audblk.deltlen = new Array(bsi.nfchans);
                     audblk.deltba = new Array(bsi.nfchans);
@@ -393,9 +392,17 @@ const handleFrameStream = (frameStream) => {
                             }
                         }
                     }
+                } else {
+                    audblk.cpldeltbae = 2;
+                    for (let ch = 0; ch < bsi.nfchans; ch++) {
+                        audblk.deltbae[ch] = 2;
+                    }
                 }
 
                 // TODO: bit allocation, see section 7.3
+                // "The bit allocation must be computed in the decoder whenever the exponent strategy (chexpstr,
+                // cplexpstr, lfeexpstr) for one or more channels does not indicate reuse, or whenever baie, snroffste, or
+                // deltbaie = 1."
 
                 audblk.sdecay = SLOW_DECAY[audblk.sdcycod];
                 audblk.fdecay = FAST_DECAY[audblk.fdcycod];
@@ -405,17 +412,9 @@ const handleFrameStream = (frameStream) => {
                 
                 audblk.baps = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
-                    if (audblk.csnroffst === 0 && audblk.fsnroffst[ch] === 0 &&
-                        audblk.cplfsnroffst === 0 && audblk.lfefsnroffst === 0) {
-                        audblk.baps[ch] = new Array(audblk.endmant[ch]);
-                        for (let i = 0; i < audblk.baps[ch].length; i++) {
-                            audblk.baps[ch][i] = 0;
-                        }
-                    } else {
-                        audblk.baps[ch] = bitAllocation(bsi, audblk, 0,
-                            audblk.endmant[ch], audblk.exps[ch], FAST_GAIN[audblk.fgaincod[ch]],
-                            (((audblk.csnroffst - 15) << 4) + audblk.fsnroffst[ch]) << 2, 0, 0); 
-                    }
+                    audblk.baps[ch] = bitAllocation(bsi, audblk, audblk.strtmant[ch],
+                        audblk.endmant[ch], audblk.exps[ch], FAST_GAIN[audblk.fgaincod[ch]],
+                        (((audblk.csnroffst - 15) << 4) + audblk.fsnroffst[ch]) << 2, 0, 0);
                 }
                 if (audblk.cplinu) {
                     audblk.cplbap = bitAllocation(bsi, audblk, audblk.cplstrtmant,
@@ -428,9 +427,6 @@ const handleFrameStream = (frameStream) => {
                         audblk.lfeendmant, audblk.lfeexps, FAST_GAIN[audblk.lfefgaincod],
                         (((audblk.csnroffst - 15) << 4) + audblk.lfefsnroffst) << 2, 0, 0);
                 }
-
-                console.log(audblk);
-                return;
                 
                 // Dummy data
                 if (frame.getUnsigned(1) !== 0) {
