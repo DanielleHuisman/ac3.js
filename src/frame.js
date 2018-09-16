@@ -104,6 +104,12 @@ const handleFrameStream = (frameStream) => {
 
             // Audio Blocks
             let audblk = {};
+            audblk.strtmant = new Array(bsi.nfchans);
+            audblk.endmant = new Array(bsi.nfchans);
+            audblk.nchgrps = new Array(bsi.nfchans);
+            audblk.exps = new Array(bsi.nfchans);
+            audblk.gainrng = new Array(bsi.nfchans);
+
             let mantissas = new MantissaReader(frame);
             for (let blk = 0; blk < 6; blk++) {
                 // Block switch and dither flags
@@ -256,11 +262,6 @@ const handleFrameStream = (frameStream) => {
                 }
 
                 // Exponents for full bandwidth channels
-                audblk.strtmant = new Array(bsi.nfchans);
-                audblk.endmant = new Array(bsi.nfchans);
-                audblk.nchgrps = new Array(bsi.nfchans);
-                audblk.exps = new Array(bsi.nfchans);
-                audblk.gainrng = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
                     if (audblk.chexpstr[ch] !== EXP_REUSE) {
                         audblk.strtmant[ch] = 0;
@@ -432,13 +433,17 @@ const handleFrameStream = (frameStream) => {
                 
                 // Dummy data
                 if (frame.getUnsigned(1) !== 0) {
-                    frame.skip(frame.getUnsigned(9));
+                    let skipl = frame.getUnsigned(9);
+                    while (skipl--) {
+                        frame.getUnsigned(8);
+                    }
                 }
 
                 // Quantized mantissa values
                 audblk.got_cplchan = 0;
                 audblk.chmant = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
+                    debugger;
                     audblk.chmant[ch] = new Array(audblk.endmant[ch]);
                     for (let bin = 0; bin < audblk.endmant[ch]; bin++) {
                         audblk.chmant[ch][bin] = mantissas.get(audblk.baps[ch][bin]);
@@ -448,7 +453,7 @@ const handleFrameStream = (frameStream) => {
                         audblk.ncplmant = 12 * audblk.ncplsubnd;
                         audblk.cplmant = new Array(audblk.ncplmant);
                         for (let bin = 0; bin < audblk.ncplmant; bin++) {
-                            audblk.cplmant[bin] = mantissas.get(audblk.cplbap[bin]);
+                            audblk.cplmant[bin] = mantissas.get(audblk.cplbap[bin + audblk.cplstrtmant]);
                         }
                         audblk.got_cplchan = 1;
                     }
@@ -461,6 +466,7 @@ const handleFrameStream = (frameStream) => {
                     }
                 }
 
+                debugger;
                 console.log(blk, audblk);
             }
 
