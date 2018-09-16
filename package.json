@@ -18,6 +18,7 @@
   "scripts": {
     "build": "babel src --out-dir lib --copy-files --source-maps",
     "dev": "babel-node src/index.js",
+    "debug": "babel-node --inspect-brk src/index.js",
     "start": "node lib/index.js",
     "prepublish": "yarn run build"
   },
