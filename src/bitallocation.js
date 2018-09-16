@@ -1,4 +1,4 @@
-import { BNDTAB, BNDSZ, LATAB, MASKTAB, HTH } from "./tables";
+import { BNDTAB, BNDSZ, LATAB, MASKTAB, BAPTAB, HTH } from "./tables";
 
 function logadd(a, b) {
     let c = a - b;
@@ -30,7 +30,7 @@ function calc_lowcomp(a, b0, b1, bin) {
     return a;
 }
 
-export const bitAllocation = (audblk, start, end, exp, fgain, snroffset, fastleak, slowleak) => {
+export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fastleak, slowleak) => {
     let bndstrt = MASKTAB[start];
     let bndend = MASKTAB[end - 1] + 1;
     let psd = new Array(end);
@@ -109,7 +109,7 @@ export const bitAllocation = (audblk, start, end, exp, fgain, snroffset, fastlea
         if (bndpsd[bin] < audblk.dbknee) {
             excite[bin] += ((audblk.dbknee - bndpsd[bin]) >> 2);
         }
-        mask[bin] = Math.max(excite[bin], HTH[audblk.fscod][bin]);
+        mask[bin] = Math.max(excite[bin], HTH[bsi.fscod][bin]);
     }
 
     if (audblk.deltbae === 0 || audblk.deltbae === 1) {
@@ -129,6 +129,7 @@ export const bitAllocation = (audblk, start, end, exp, fgain, snroffset, fastlea
         }
     }
 
+    let bap = new Array(end);
     let i = start;
     j = MASKTAB[start];
     do {

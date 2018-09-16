@@ -27,12 +27,11 @@ const handleFrameStream = (frameStream) => {
             const crc2 = frame.slice(frame.byteLength - 2).getUint16();
             // TODO: validate CRCs
 
-            // Skip frame rate data
-            frame.getInt8();
-
             // Bit Stream Information (BSI)
             const bsi = {};
 
+            bsi.fscod = frame.getUnsigned(2);
+            bsi.frmsizecod = frame.getUnsigned(6);
             bsi.bsid = frame.getUnsigned(5);
             bsi.bsmod = frame.getUnsigned(3);
 
@@ -103,11 +102,8 @@ const handleFrameStream = (frameStream) => {
             };
 
             // Audio Blocks
-            const audblks = new Array(6);
+            var audblk = {};
             for (let blk = 0; blk < 6; blk++) {
-                const audblk = {};
-                audblks[blk] = audblk;
-
                 // Block switch and dither flags
                 audblk.blksw = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
@@ -406,7 +402,7 @@ const handleFrameStream = (frameStream) => {
                 audblk.sgain = SLOW_GAIN[audblk.sgaincod];
                 audblk.dbknee = DB_PER_BIT[audblk.dbpbcod];
                 audblk.floor = FLOOR[audblk.floorcod];
-
+                
                 audblk.baps = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
                     if (audblk.csnroffst === 0 && audblk.fsnroffst[ch] === 0 &&
@@ -417,23 +413,26 @@ const handleFrameStream = (frameStream) => {
                         }
                     } else {
                         if (audblk.chincpl[ch]) {
-                            audblk.baps[ch] = bitAllocation(audblk, audblk.cplstrtmant,
+                            audblk.baps[ch] = bitAllocation(bsi, audblk, audblk.cplstrtmant,
                                 audblk.cplendmant, audblk.exps[ch], FAST_GAIN[audblk.cplfgaincod],
                                 (((audblk.csnroffst - 15) << 4) + audblk.cplfsnroffst) << 2,
                                 (audblk.cplfleak << 8) + 768, (audblk.cplsleak << 8) + 768);
                         } else {
-                            audblk.baps[ch] = bitAllocation(audblk, 0,
+                            audblk.baps[ch] = bitAllocation(bsi, audblk, 0,
                                 audblk.endmant[ch], audblk.exps[ch], FAST_GAIN[audblk.fgaincod],
                                 (((audblk.csnroffst - 15) << 4) + audblk.fsnroffst[ch]) << 2, 0, 0); 
                         }
                     }
                 }
                 if (bsi.lfeon) {
-                    audblk.lfebap = bitAllocation(audblk, audblk.lfestartmant,
+                    audblk.lfebap = bitAllocation(bsi, audblk, audblk.lfestartmant,
                         audblk.lfeendmant, audblk.lfeexps, FAST_GAIN[audblk.lfefgaincod],
                         (((audblk.csnroffst - 15) << 4) + audblk.lfefsnroffst) << 2, 0, 0);
                 }
 
+                console.log(audblk);
+                return;
+                
                 // Dummy data
                 if (frame.getUnsigned(1) !== 0) {
                     frame.skip(frame.getUnsigned(9));
