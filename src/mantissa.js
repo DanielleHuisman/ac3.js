@@ -1,4 +1,4 @@
-import { BAP_1, BAP_2, BAP_4, BAP_5 } from "./tables";
+import { BAP_1, BAP_2, BAP_3, BAP_4, BAP_5 } from "./tables";
 
 export const MantissaReader = function(frame) {
     this.bap_1_ptr = 3;
@@ -22,7 +22,7 @@ export const MantissaReader = function(frame) {
                 }
                 return this.bap_2[this.bap_2_ptr++];
             case 3:
-                return frame.getSigned(3) / 7;
+                return BAP_3[frame.getSigned(3)];
             case 4:
                 if (this.bap_4_ptr > 1) {
                     this.bap_4 = BAP_4[frame.getUnsigned(7)];
