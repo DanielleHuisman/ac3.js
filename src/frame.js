@@ -468,13 +468,8 @@ const handleFrameStream = (frameStream) => {
                     }
                 }
 
-                debugger;
-                console.log(blk, audblk);
-            }
-
-            global.test = global.test || 0;
-            if (++test === 3) {
-                throw new Error('Test stop');
+                //debugger;
+                //console.log(blk, audblk);
             }
         }
     });

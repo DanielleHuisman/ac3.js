@@ -8,13 +8,13 @@ const handleReadStream = (inputStream) => {
     const outputStream = through.obj();
 
     let frameSize = 0;
+    let totalSize = 0;
 
     inputStream.on('readable', () => {
-        if (!frameSize) {
-            console.log('Stream started');
+        console.log('Stream started');
 
-            // Read syncinfo
-            const frameHeader = inputStream.read(5);
+        let frameHeader = null;
+        while ((frameHeader = inputStream.read(5)) !== null) {
             const bitStream = new jDataView(frameHeader);
 
             // Validate syncword
@@ -52,18 +52,12 @@ const handleReadStream = (inputStream) => {
             console.log('Bit rate', bitRate, 'kbps', 'Frame size', frameSize, 'bytes');
 
             // Read remaining frame
+            console.log("Reading frame at offset " + totalSize);
+            totalSize += frameSize;
             const frame = inputStream.read(frameSize - 5);
 
             // Merge frame header and actual frame
             outputStream.push(new jDataView(Buffer.concat([frameHeader, frame])));
-        }
-
-        // Read frames
-        let chunk = null;
-        while ((chunk = inputStream.read(frameSize)) !== null) {
-            const bitStream = new jDataView(chunk);
-
-            outputStream.push(bitStream);
         }
     });
 
