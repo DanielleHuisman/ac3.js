@@ -1,4 +1,4 @@
-export const unpackExponents = (exps, absexp, grpsize) => {
+export const unpackExponents = (exps, absexp, grpsize, skip) => {
     const dexps = new Array(exps.length * 3);
 
     // Unpack mapped values
@@ -22,11 +22,11 @@ export const unpackExponents = (exps, absexp, grpsize) => {
     }
 
     // Expand to full absolute exponent array
-    const aexps = new Array(1 + dexps.length * grpsize);
+    const aexps = new Array(skip + dexps.length * grpsize);
     aexps[0] = absexp;
     for (let i = 0; i < dexps.length; i++) {
         for (let j = 0; j < grpsize; j++) {
-            aexps[(i * grpsize) + j + 1] = dexps[i];
+            aexps[(i * grpsize) + j + skip] = dexps[i];
         }
     }
     return aexps;
