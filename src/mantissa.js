@@ -36,11 +36,11 @@ export const MantissaReader = function(frame) {
             case 11:
             case 12:
             case 13:
-                return frame.getUnsigned(bap - 1);
+                return frame.getUnsigned(bap - 1) / Math.pow(2, bap - 1);
             case 14:
-                return frame.getUnsigned(14);
+                return frame.getUnsigned(14) / Math.pow(2, 14);
             case 15:
-                return frame.getUnsigned(16);
+                return frame.getUnsigned(16) / Math.pow(2, 16);
         }
     }
 }
