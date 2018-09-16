@@ -130,7 +130,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
         }
     }
 
-    let bap = new Array(end);
+    let bap = new Array(end - start);
     let i = start;
     j = bndstrt;
     do {
@@ -145,7 +145,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
         for (let k = i; k < lastbin; k++) {
             let address = (psd[i] - mask[j]) >> 5 ;
             address = Math.min(63, Math.max(0, address));
-            bap[i] = BAPTAB[address];
+            bap[i - start] = BAPTAB[address];
             i++;
         }
         j++;

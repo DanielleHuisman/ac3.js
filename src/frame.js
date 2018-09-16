@@ -443,17 +443,18 @@ const handleFrameStream = (frameStream) => {
                 audblk.got_cplchan = 0;
                 audblk.chmant = new Array(bsi.nfchans);
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
-                    debugger;
                     audblk.chmant[ch] = new Array(audblk.endmant[ch]);
                     for (let bin = 0; bin < audblk.endmant[ch]; bin++) {
-                        audblk.chmant[ch][bin] = mantissas.get(audblk.baps[ch][bin]);
+                        audblk.chmant[ch][bin] = mantissas.get(audblk.baps[ch][bin]) *
+                            Math.pow(2, -audblk.exps[ch][bin]);
                     }
 
                     if (audblk.cplinu && audblk.chincpl[ch] && !audblk.got_cplchan) {
                         audblk.ncplmant = 12 * audblk.ncplsubnd;
                         audblk.cplmant = new Array(audblk.ncplmant);
                         for (let bin = 0; bin < audblk.ncplmant; bin++) {
-                            audblk.cplmant[bin] = mantissas.get(audblk.cplbap[bin + audblk.cplstrtmant]);
+                            audblk.cplmant[bin] = mantissas.get(audblk.cplbap[bin]) *
+                                Math.pow(2, -audblk.cplexps[bin]);
                         }
                         audblk.got_cplchan = 1;
                     }
@@ -462,7 +463,8 @@ const handleFrameStream = (frameStream) => {
                     audblk.nlfemant = 7;
                     audblk.lfemant = new Array(audblk.nlfemant);
                     for (let bin = 0; bin < audblk.nlfemant; bin++) {
-                        audblk.lfemant[bin] = mantissas.get(audblk.lfebap[bin]);
+                        audblk.lfemant[bin] = mantissas.get(audblk.lfebap[bin]) *
+                            Math.pow(2, -audblk.lfeexps[bin]);
                     }
                 }
 
