@@ -412,17 +412,16 @@ const handleFrameStream = (frameStream) => {
                             audblk.baps[ch][i] = 0;
                         }
                     } else {
-                        /*if (audblk.chincpl[ch]) {
-                            audblk.baps[ch] = bitAllocation(bsi, audblk, audblk.cplstrtmant,
-                                audblk.cplendmant, audblk.exps[ch], FAST_GAIN[audblk.cplfgaincod],
-                                (((audblk.csnroffst - 15) << 4) + audblk.cplfsnroffst) << 2,
-                                (audblk.cplfleak << 8) + 768, (audblk.cplsleak << 8) + 768);
-                        } else {*/
-                            audblk.baps[ch] = bitAllocation(bsi, audblk, 0,
-                                audblk.endmant[ch], audblk.exps[ch], FAST_GAIN[audblk.fgaincod[ch]],
-                                (((audblk.csnroffst - 15) << 4) + audblk.fsnroffst[ch]) << 2, 0, 0); 
-                        //}
+                        audblk.baps[ch] = bitAllocation(bsi, audblk, 0,
+                            audblk.endmant[ch], audblk.exps[ch], FAST_GAIN[audblk.fgaincod[ch]],
+                            (((audblk.csnroffst - 15) << 4) + audblk.fsnroffst[ch]) << 2, 0, 0); 
                     }
+                }
+                if (audblk.cplinu) {
+                    audblk.cplbap = bitAllocation(bsi, audblk, audblk.cplstrtmant,
+                        audblk.cplendmant, audblk.cplexps, FAST_GAIN[audblk.cplfgaincod],
+                        (((audblk.csnroffst - 15) << 4) + audblk.cplfsnroffst) << 2,
+                        (audblk.cplfleak << 8) + 768, (audblk.cplsleak << 8) + 768);
                 }
                 if (bsi.lfeon) {
                     audblk.lfebap = bitAllocation(bsi, audblk, audblk.lfestartmant,
