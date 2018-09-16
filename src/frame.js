@@ -118,8 +118,9 @@ const handleFrameStream = (frameStream) => {
             audblk.exps = new Array(bsi.nfchans);
             audblk.gainrng = new Array(bsi.nfchans);
 
-            let mantissas = new MantissaReader(frame);
             for (let blk = 0; blk < 6; blk++) {
+                let mantissas = new MantissaReader(frame);
+
                 // Block switch and dither flags
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
                     audblk.blksw[ch] = frame.getUnsigned(1);
