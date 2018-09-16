@@ -282,7 +282,7 @@ const handleFrameStream = (frameStream) => {
 
                         audblk.exps[ch] = new Array(audblk.nchgrps[ch]);
                         const absexps = frame.getUnsigned(4);
-                        for (let grp = 1; grp <= audblk.nchgrps[ch]; grp++) {
+                        for (let grp = 0; grp < audblk.nchgrps[ch]; grp++) {
                             audblk.exps[ch][grp] = frame.getUnsigned(7);
                         }
 
