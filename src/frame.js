@@ -4,6 +4,7 @@ import {EXP_REUSE, EXP_D15, EXP_D25, EXP_D45} from './constants';
 import {unpackExponents} from './exponents';
 import { FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR } from './tables';
 import { bitAllocation } from './bitallocation';
+import { MantissaReader } from './mantissa';
 
 const CHANNELS = [2, 1, 2, 3, 3, 4, 4, 5];
 const GROUP_SIZE = [0, 1, 2, 4];
@@ -102,7 +103,8 @@ const handleFrameStream = (frameStream) => {
             };
 
             // Audio Blocks
-            var audblk = {};
+            let audblk = {};
+            let mantissas = new MantissaReader(frame);
             for (let blk = 0; blk < 6; blk++) {
                 // Block switch and dither flags
                 audblk.blksw = new Array(bsi.nfchans);
@@ -439,16 +441,14 @@ const handleFrameStream = (frameStream) => {
                 for (let ch = 0; ch < bsi.nfchans; ch++) {
                     audblk.chmant[ch] = new Array(audblk.endmant[ch]);
                     for (let bin = 0; bin < audblk.endmant[ch]; bin++) {
-                        // TODO: requires bit allocation pointers from section 7.3
-                        // audblk.chmant[ch][bin] = frame.getUnsigned(UNKNOWN);
+                        audblk.chmant[ch][bin] = mantissas.get(audblk.baps[ch][bin]);
                     }
 
                     if (audblk.cplinu && audblk.chincpl[ch] && !audblk.got_cplchan) {
                         audblk.ncplmant = 12 * audblk.ncplsubnd;
                         audblk.cplmant = new Array(audblk.ncplmant);
                         for (let bin = 0; bin < audblk.ncplmant; bin++) {
-                            // TODO: requires bit allocation pointers from section 7.3
-                            // audblk.cplmant[bin] = frame.getUnsigned(UNKNOWN);
+                            audblk.cplmant[bin] = mantissas.get(audblk.cplbap[bin]);
                         }
                         audblk.got_cplchan = 1;
                     }
@@ -457,8 +457,7 @@ const handleFrameStream = (frameStream) => {
                     audblk.nlfemant = 7;
                     audblk.lfemant = new Array(audblk.nlfemant);
                     for (let bin = 0; bin < audblk.nlfemant; bin++) {
-                        // TODO: requires bit allocation pointers from section 7.3
-                        // audblk.lfemant[bin] = frame.getUnsigned(UNKNOWN);
+                        audblk.lfemant[bin] = mantissas.get(audblk.lfebap[bin]);
                     }
                 }
 
