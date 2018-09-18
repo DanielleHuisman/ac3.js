@@ -23,7 +23,6 @@ const z64a = fft64.createComplexArray();
 const z64b = fft64.createComplexArray();
 const y128a = new Array(N/2);
 const y128b = new Array(N/2);
-const x128 = new Array(N/2);
 
 (function() {
     for (let i = 0; i < N/4; i++) {
@@ -81,20 +80,21 @@ export const IMDCT = function() {
         }
         fft64.inverseTransform(Z64A, z64a);
         fft64.inverseTransform(Z64B, z64b);
-        for (let k = 0; k < N/8; k++) {
-            
-            y128a[n] = (zr1[n] * xcos2[n] - zi1[n] * xsin2[n]) + j * (zi1[n] * xcos2[n] + zr1[n] * xsin2[n]) ;
-
+        for (let n = 0; n < N/8; n++) {
+            y128a[n * 2] = (z64a[n * 2] * xcos2[n]) - (z64a[n * 2 + 1] * xsin2[n]);
+            y128a[n * 2 + 1] = (z64a[n * 2 + 1] * xcos2[n]) + (z64a[n * 2] * xsin2[n]);
+            y128b[n * 2] = (z64b[n * 2] * xcos2[n]) - (z64b[n * 2 + 1] * xsin2[n]);
+            y128b[n * 2 + 1] = (z64b[n * 2 + 1] * xcos2[n]) + (z64b[n * 2] * xsin2[n]);
         }
         for (let n = 0; n < N/8; n++) {
-            x256[2*n] = -y256[2 * (N/8+n) + 1] * WINDOW[2*n];
-            x256[2*n+1] = y256[2 * (N/8-n-1)] * WINDOW[2*n+1];
-            x256[N/4+2*n] = -y256[2 * n] * WINDOW[N/4+2*n];
-            x256[N/4+2*n+1] = y256[2 * (N/4-n-1) + 1] * WINDOW[N/4+2*n+1];
-            x256[N/2+2*n] = -y256[2 * (N/8+n)] * WINDOW[N/2-2*n-1];
-            x256[N/2+2*n+1] = y256[2 * (N/8-n-1) + 1] * WINDOW[N/2-2*n-2];
-            x256[3*N/4+2*n] = y256[2 * n + 1] * WINDOW[N/4-2*n-1];
-            x256[3*N/4+2*n+1] = -y256[2 * (N/4-n-1)] * WINDOW[N/4-2*n-2];
+            x256[2*n] = -y128a[2 * n + 1] * WINDOW[2*n];
+            x256[2*n+1] = y128a[2 * (N/8-n-1)] * WINDOW[2*n+1];
+            x256[N/4+2*n] = -y128a[2 * n] * WINDOW[N/4+2*n];
+            x256[N/4+2*n+1] = y128a[2 * (N/8-n-1) + 1] * WINDOW[N/4+2*n+1];
+            x256[N/2+2*n] = -y128b[2 * n] * WINDOW[N/2-2*n-1];
+            x256[N/2+2*n+1] = y128b[2 * (N/8-n-1) + 1] * WINDOW[N/2-2*n-2];
+            x256[3*N/4+2*n] = y128b[2 * n + 1] * WINDOW[N/4-2*n-1];
+            x256[3*N/4+2*n+1] = -y128b[2 * (N/4-n-1)] * WINDOW[N/4-2*n-2];
         }
         for (let n = 0; n < N/2; n++) {
             this.outputSamples[n] = 2 * (x256[n] + this.delaySamples[n]);
