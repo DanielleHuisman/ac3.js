@@ -24,7 +24,7 @@ const z64b = fft64.createComplexArray();
 const y128a = new Array(N/2);
 const y128b = new Array(N/2);
 
-(function() {
+(function() { 
     for (let i = 0; i < N/4; i++) {
         xcos1[i] = -Math.cos(2 * Math.PI * (8 * i + 1) / (8 * N));
         xsin1[i] = -Math.sin(2 * Math.PI * (8 * i + 1) / (8 * N));

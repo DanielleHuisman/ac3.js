@@ -1,4 +1,4 @@
-import through from 'through2';
+import through2 from 'through2';
 
 import { EXP_REUSE, EXP_D15, EXP_D25, EXP_D45 } from './constants';
 import { unpackExponents } from './exponents';
@@ -10,7 +10,7 @@ import { IMDCT } from './mdct';
 const CHANNELS = [2, 1, 2, 3, 3, 4, 4, 5];
 const GROUP_SIZE = [0, 1, 2, 4];
 
-export const AC3FrameParser = function() {
+export const AC3FrameDecoder = function() {
     this.imdct = new Array(6);
     this.samples = new Array(6);
     
@@ -20,7 +20,7 @@ export const AC3FrameParser = function() {
     }
 };
 
-AC3FrameParser.prototype.decodeFrame = function(frame) {
+AC3FrameDecoder.prototype.decodeFrame = function(frame) {
     // Syncword
     const syncword = frame.getUint16();
     if (syncword != 0x0b77) {
@@ -511,14 +511,18 @@ AC3FrameParser.prototype.decodeFrame = function(frame) {
             if (audblk.blksw[ch]) {
                 this.imdct[ch].process128(audblk.chmant[ch], this.samples[ch], blk * 256);
             } else {
-                debugger;
+                //console.log(audblk.chmant[ch].slice(0,64));
+                //console.log(audblk.chmant[ch].slice(64,128));
+                //console.log(audblk.chmant[ch].slice(128,192));
+                //console.log(audblk.chmant[ch].slice(192,256));
+                //debugger;
                 this.imdct[ch].process256(audblk.chmant[ch], this.samples[ch], blk * 256);
             }
         }
     }
 };
 
-AC3FrameParser.prototype.pcmBytes = function() {
+AC3FrameDecoder.prototype.pcmBytes = function() {
     let sampleBytes = new Uint8Array(1024);
     let sample;
     for (let i = 0; i < 1536; i++) {
@@ -532,23 +536,14 @@ AC3FrameParser.prototype.pcmBytes = function() {
     return sampleBytes;
 };
 
-const handleFrameStream = (frameStream, outputStream) => {
+export const AC3FrameParser = function() {
     let frames = 0;
-    let parser = new AC3FrameParser();
+    let parser = new AC3FrameDecoder();
 
-    frameStream.on('readable', () => {
-        let frame = null;
-        while ((frame = frameStream.read()) !== null) {
-            frames++;
-            parser.decodeFrame(frame);
-            outputStream.write(parser.pcmBytes());
-        }
+    return through2.obj(function (chunk, enc, callback) {
+        parser.decodeFrame(chunk);
+        this.push(parser.pcmBytes());
+        frames++;
+        callback();
     });
-
-    frameStream.on('end', () => {
-        console.log('Frames', frames);
-        console.log('Frame stream ended');
-    });
-};
-
-export default handleFrameStream;
+}

@@ -1,13 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 
-import handleReadStream from './reader';
-import handleFrameStream from './frame';
+import { AC3Deframer } from './reader';
+import { AC3FrameParser } from './frame';
 
-const TEST_FILE = path.join(__dirname, '..', 'tests', 'test0.ac3');
+const TEST_FILE = path.join(__dirname, '..', 'tests', 'test1.ac3');
 
 const inputStream = fs.createReadStream(TEST_FILE);
 const outputStream = fs.createWriteStream('test.bin');
 
-const frameStream = handleReadStream(inputStream);
-const result = handleFrameStream(frameStream, outputStream);
+const deframer = AC3Deframer();
+const parser = AC3FrameParser();
+inputStream.pipe(deframer).pipe(parser).pipe(outputStream);
