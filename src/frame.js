@@ -96,7 +96,7 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
         bsi.addbsi = frame.getBytes(bsi.addbsil + 1);
     }
 
-    console.log(bsi);
+    //console.log(bsi);
 
     const params = {
         slowDecay: 0,
@@ -515,7 +515,7 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
                 //console.log(audblk.chmant[ch].slice(64,128));
                 //console.log(audblk.chmant[ch].slice(128,192));
                 //console.log(audblk.chmant[ch].slice(192,256));
-                //debugger;
+                debugger;
                 this.imdct[ch].process256(audblk.chmant[ch], this.samples[ch], blk * 256);
             }
         }
@@ -523,7 +523,7 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
 };
 
 AC3FrameDecoder.prototype.pcmBytes = function() {
-    let sampleBytes = new Uint8Array(1024);
+    let sampleBytes = new Uint8Array(6144);
     let sample;
     for (let i = 0; i < 1536; i++) {
         sample = this.samples[0][i];
