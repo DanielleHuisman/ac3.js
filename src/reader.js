@@ -3,12 +3,12 @@ import through from 'through2';
 
 const BIT_RATES = [32,  40,  48,  56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640];
 
-const handleReadStream = (inputStream) => {
+const handleReadStream = (inputStream, ofs) => {
     // Create output stream
     const outputStream = through.obj();
 
     let frameSize = 0;
-    let totalSize = 0;
+
 
     inputStream.on('readable', () => {
         console.log('Stream started');
@@ -52,9 +52,13 @@ const handleReadStream = (inputStream) => {
             console.log('Bit rate', bitRate, 'kbps', 'Frame size', frameSize, 'bytes');
 
             // Read remaining frame
-            console.log("Reading frame at offset " + totalSize);
-            totalSize += frameSize;
             const frame = inputStream.read(frameSize - 5);
+            if (frame == null) {
+                // Put the frame header back as we don't have enough data for the whole frame
+                inputStream.unshift(frameHeader);
+                inputStream.end();
+                return;
+            }
 
             // Merge frame header and actual frame
             outputStream.push(new jDataView(Buffer.concat([frameHeader, frame])));
