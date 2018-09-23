@@ -9,7 +9,6 @@ export const AC3Deframer = function() {
     let leftoverBytes = Buffer.from([]);
 
     return through2.obj(function (chunk, enc, callback) {
-        debugger;
         let chunkPtr = 0;
         if (leftoverBytes.length) {
             chunk = Buffer.concat([leftoverBytes, chunk]);
