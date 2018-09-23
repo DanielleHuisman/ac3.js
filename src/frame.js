@@ -511,11 +511,6 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
             if (audblk.blksw[ch]) {
                 this.imdct[ch].process128(audblk.chmant[ch], this.samples[ch], blk * 256);
             } else {
-                //console.log(audblk.chmant[ch].slice(0,64));
-                //console.log(audblk.chmant[ch].slice(64,128));
-                //console.log(audblk.chmant[ch].slice(128,192));
-                //console.log(audblk.chmant[ch].slice(192,256));
-                debugger;
                 this.imdct[ch].process256(audblk.chmant[ch], this.samples[ch], blk * 256);
             }
         }
