@@ -22,7 +22,7 @@ export const MantissaReader = function(frame) {
                 }
                 return this.bap_2[this.bap_2_ptr++];
             case 3:
-                return BAP_3[frame.getSigned(3)];
+                return BAP_3[frame.getUnsigned(3)];
             case 4:
                 if (this.bap_4_ptr > 1) {
                     this.bap_4 = BAP_4[frame.getUnsigned(7)];
