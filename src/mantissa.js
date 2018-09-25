@@ -1,5 +1,7 @@
 import { BAP_1, BAP_2, BAP_3, BAP_4, BAP_5 } from "./tables";
 
+const DITHER_CONST = Math.sqrt(2);
+
 export const MantissaReader = function(frame) {
     this.bap_1_ptr = 3;
     this.bap_2_ptr = 3;
@@ -48,4 +50,8 @@ export const MantissaReader = function(frame) {
                 debugger;
         }
     }
+}
+
+export function getDitherMantissa() {
+    return (Math.random() - 0.5) * DITHER_CONST;
 }

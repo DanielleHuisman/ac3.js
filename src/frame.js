@@ -4,7 +4,7 @@ import { EXP_REUSE, EXP_D15, EXP_D25, EXP_D45 } from './constants';
 import { unpackExponents } from './exponents';
 import { FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR } from './tables';
 import { bitAllocation } from './bitallocation';
-import { MantissaReader } from './mantissa';
+import { MantissaReader, getDitherMantissa } from './mantissa';
 import { IMDCT } from './mdct';
 
 const CHANNELS = [2, 1, 2, 3, 3, 4, 4, 5];
@@ -466,8 +466,13 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
             audblk.chmant[ch] = new Array(256);
             audblk.chmant[ch].fill(0);
             for (let bin = 0; bin < audblk.endmant[ch]; bin++) {
-                audblk.chmant[ch][bin] = mantissas.get(audblk.baps[ch][bin]) *
-                    Math.pow(2, -audblk.exps[ch][bin]);
+                if (audblk.baps[ch][bin] != 0 || !audblk.dithflag[ch]) {
+                    audblk.chmant[ch][bin] = mantissas.get(audblk.baps[ch][bin]) *
+                        Math.pow(2, -audblk.exps[ch][bin]);
+                } else {
+                    audblk.chmant[ch][bin] = getDitherMantissa() *
+                        Math.pow(2, -audblk.exps[ch][bin]);
+                }
             }
 
             if (audblk.cplinu && audblk.chincpl[ch] && !audblk.got_cplchan) {
@@ -480,6 +485,7 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
                 audblk.got_cplchan = 1;
             }
         }
+
         if (bsi.lfeon) {
             audblk.nlfemant = 7;
             audblk.lfemant = new Array(audblk.nlfemant);
@@ -495,15 +501,21 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
                 if (audblk.chincpl[ch]) {
                     for (let sbnd = 0; sbnd < audblk.ncplsubnd; sbnd++) {
                         for (let bin = 0; bin < 12; bin++) {
+                            let mantissa;
+                            if (audblk.cplmant[sbnd * 12 + bin] == 0 && audblk.dithflag[ch]) {
+                                mantissa = getDitherMantissa() *
+                                    Math.pow(2, -audblk.cplexps[sbnd * 12 + bin]);
+                            } else {
+                                mantissa = audblk.cplmant[sbnd * 12 + bin];
+                            }
                             audblk.chmant[ch][(sbnd + audblk.cplbegf) * 12 + bin + 37] =
-                                audblk.cplmant[sbnd * 12 + bin] * audblk.cplco[ch][sbnd] * 8;
+                                mantissa * audblk.cplco[ch][sbnd] * 8;
                         }
                     }
                 }
             }
         }
 
-        // TODO: Dithering
         // TODO: Rematrixing
         // TODO: Downmix
 
