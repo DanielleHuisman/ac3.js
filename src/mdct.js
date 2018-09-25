@@ -60,11 +60,12 @@ export const IMDCT = function() {
             x256[3*N/4+2*n+1] = -y128[2 * (N/4-n-1)] * WINDOW[N/4-2*n-2];
         }
         for (let n = 0; n < N/2; n++) {
-            outputSamples[n + outputOffset] = 128 * 65535 * (x256[n] + this.delaySamples[n]);
-            if (this.outputSamples[n] < -32767)
-                this.outputSamples[n] = -32767;
-            else if (this.outputSamples[n] > 32767)
-                this.outputSamples[n] = 32767;
+            let outputSample = 128 * 65535 * (x256[n] + this.delaySamples[n]);
+            if (outputSample < -32767)
+                outputSample = -32767;
+            else if (outputSample > 32767)
+                outputSample = 32767;
+            outputSamples[n + outputOffset] = outputSample;
             this.delaySamples[n] = x256[N/2 + n];
         }
     }
@@ -95,11 +96,12 @@ export const IMDCT = function() {
             x256[3*N/4+2*n+1] = -y64b[2 * (N/-n-1)] * WINDOW[N/4-2*n-2];
         }
         for (let n = 0; n < N/2; n++) {
-            outputSamples[n + outputOffset] = 64 * 65536 * (x256[n] + this.delaySamples[n]);
-            if (this.outputSamples[n] < -32767)
-                this.outputSamples[n] = -32767;
-            else if (this.outputSamples[n] > 32767)
-                this.outputSamples[n] = 32767;
+            let outputSample = 64 * 65535 * (x256[n] + this.delaySamples[n]);
+            if (outputSample < -32767)
+                outputSample = -32767;
+            else if (outputSample > 32767)
+                outputSample = 32767;
+            outputSamples[n + outputOffset] = outputSample;
             this.delaySamples[n] = x256[N/2 + n];
         }
     }
