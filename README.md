@@ -19,10 +19,10 @@ JavaScript ATSC A/52 (AC-3) decoder
 - [x] Decode Exponents
 - [x] Bit Allocation
 - [x] Process Mantissas
-- [ ] Decoupling
-- [ ] Rematrixing
-- [ ] Inverse Transform
-- [ ] Window, Overlap/Add
+- [x] Decoupling
+- [x] Rematrixing
+- [x] Inverse Transform
+- [x] Window, Overlap/Add
 - [ ] Downmixing
 - [ ] PCM Output Buffer
 - [ ] Output PCM
