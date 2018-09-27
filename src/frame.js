@@ -182,6 +182,7 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
                 audblk.ncplsubnd = 3 + audblk.cplendf - audblk.cplbegf;
                 audblk.ncplbnd = audblk.ncplsubnd;
                 audblk.cplbndstrc = new Array(audblk.ncplsubnd);
+                audblk.cplbndstrc[0] = 0;
                 for (let bnd = 1; bnd < audblk.ncplsubnd; bnd++) {
                     audblk.cplbndstrc[bnd] = frame.getUnsigned(1);
                     audblk.ncplbnd -= audblk.cplbndstrc[bnd];
@@ -217,7 +218,7 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
                             }
                             cplco /= Math.pow(2, audblk.cplcoexp[ch][bnd] + 3 * audblk.mstrcplco[ch]);
                         }
-                        audblk.cplco[ch][bnd++] = cplco;
+                        audblk.cplco[ch][sbnd] = cplco;
                     }
                 }
             }
