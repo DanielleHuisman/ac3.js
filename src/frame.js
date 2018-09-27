@@ -136,11 +136,13 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
     audblk.cplcomant = new Array(bsi.nfchans);
     audblk.cplco = new Array(bsi.nfchans);
     audblk.chexpstr = new Array(bsi.nfchans);
+    audblk.chbwcod = new Array(bsi.nfchans);
     audblk.strtmant = new Array(bsi.nfchans);
     audblk.endmant = new Array(bsi.nfchans);
     audblk.nchgrps = new Array(bsi.nfchans);
     audblk.exps = new Array(bsi.nfchans);
     audblk.gainrng = new Array(bsi.nfchans);
+    audblk.deltbae = new Array(bsi.nfchans);
     audblk.rematflg = [];
 
     for (let blk = 0; blk < 6; blk++) {
@@ -264,7 +266,6 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
             audblk.lfeexpstr = frame.getUnsigned(1);
         }
 
-        audblk.chbwcod = new Array(bsi.nfchans);
         for (let ch = 0; ch < bsi.nfchans; ch++) {
             if (audblk.chexpstr[ch] !== EXP_REUSE) {
                 if (!audblk.chincpl[ch]) {
@@ -393,7 +394,6 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
         }
 
         // Delta bit allocation information
-        audblk.deltbae = new Array(bsi.nfchans);
         audblk.deltbaie = frame.getUnsigned(1);
         if (audblk.deltbaie) {
             if (audblk.cplinu) {
@@ -422,6 +422,7 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
             audblk.deltoffst = new Array(bsi.nfchans);
             audblk.deltlen = new Array(bsi.nfchans);
             audblk.deltba = new Array(bsi.nfchans);
+            audblk.deltnseg = new Array(bsi.nfchans);
             for (let ch = 0; ch < bsi.nfchans; ch++) {
                 if (audblk.deltbae[ch] === 0x1) {
                     audblk.deltnseg[ch] = frame.getUnsigned(2);
@@ -436,7 +437,7 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
                     }
                 }
             }
-        } else {
+        } else if (blk == 0) {
             audblk.cpldeltbae = 2;
             for (let ch = 0; ch < bsi.nfchans; ch++) {
                 audblk.deltbae[ch] = 2;
@@ -456,20 +457,38 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
 
         audblk.baps = new Array(bsi.nfchans);
         for (let ch = 0; ch < bsi.nfchans; ch++) {
+            let delt = null;
+            if (audblk.deltbae[ch] == 0 || audblk.deltbae[ch] == 1) {
+                delt = {
+                    nseg: audblk.deltnseg[ch],
+                    offst: audblk.deltoffst[ch],
+                    ba: audblk.deltba[ch],
+                    len: audblk.deltlen[ch]
+                };
+            }
             audblk.baps[ch] = bitAllocation(bsi, audblk, audblk.strtmant[ch],
                 audblk.endmant[ch], audblk.exps[ch], FAST_GAIN[audblk.fgaincod[ch]],
-                (((audblk.csnroffst - 15) << 4) + audblk.fsnroffst[ch]) << 2, 0, 0);
+                (((audblk.csnroffst - 15) << 4) + audblk.fsnroffst[ch]) << 2, 0, 0, delt);
         }
         if (audblk.cplinu) {
+            let delt = null;
+            if (audblk.cpldeltbae == 0 || audblk.cpldeltbae == 1) {
+                delt = {
+                    nseg: audblk.cpldeltnseg,
+                    offst: audblk.cpldeltoffst,
+                    ba: audblk.cpldeltba,
+                    len: audblk.cpldeltlen
+                };
+            }
             audblk.cplbap = bitAllocation(bsi, audblk, audblk.cplstrtmant,
                 audblk.cplendmant, audblk.cplexps, FAST_GAIN[audblk.cplfgaincod],
                 (((audblk.csnroffst - 15) << 4) + audblk.cplfsnroffst) << 2,
-                (audblk.cplfleak << 8) + 768, (audblk.cplsleak << 8) + 768);
+                (audblk.cplfleak << 8) + 768, (audblk.cplsleak << 8) + 768, delt);
         }
         if (bsi.lfeon) {
             audblk.lfebap = bitAllocation(bsi, audblk, audblk.lfestartmant,
                 audblk.lfeendmant, audblk.lfeexps, FAST_GAIN[audblk.lfefgaincod],
-                (((audblk.csnroffst - 15) << 4) + audblk.lfefsnroffst) << 2, 0, 0);
+                (((audblk.csnroffst - 15) << 4) + audblk.lfefsnroffst) << 2, 0, 0, null);
         }
 
         // Dummy data
