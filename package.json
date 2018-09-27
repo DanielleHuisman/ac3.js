@@ -3,7 +3,10 @@
   "description": "JavaScript ATSC A/52 (AC-3) decoder",
   "version": "1.0.0",
   "license": "MIT",
-  "author": "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
+  "contributors": [
+    "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
+    "Karl Koscher <supersat@cs.washington.edu> (https://homes.cs.washington.edu/~supersat/)"
+  ],
   "repository": "github:DanielHuisman/a52.js",
   "keywords": [
     "atsc",
@@ -18,10 +21,12 @@
   "scripts": {
     "build": "babel src --out-dir lib --copy-files --source-maps",
     "dev": "babel-node src/index.js",
+    "debug": "babel-node --inspect-brk src/index.js",
     "start": "node lib/index.js",
     "prepublish": "yarn run build"
   },
   "dependencies": {
+    "fft.js": "^4.0.3",
     "jdataview": "^2.5.0",
     "through2": "^2.0.3"
   },

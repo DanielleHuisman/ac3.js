@@ -1,21 +1,20 @@
 import jDataView from 'jdataview';
-import through from 'through2';
+import through2 from 'through2';
 
 const BIT_RATES = [32,  40,  48,  56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640];
 
-const handleReadStream = (inputStream) => {
-    // Create output stream
-    const outputStream = through.obj();
+export const AC3Deframer = function() { 
+    let frameSize;
+    let frameHeader;
+    let leftoverBytes = Buffer.from([]);
 
-    let frameSize = 0;
-
-    inputStream.on('readable', () => {
-        if (!frameSize) {
-            console.log('Stream started');
-
-            // Read syncinfo
-            const frameHeader = inputStream.read(5);
-            const bitStream = new jDataView(frameHeader);
+    return through2.obj(function (chunk, enc, callback) {
+        let chunkPtr = 0;
+        if (leftoverBytes.length) {
+            chunk = Buffer.concat([leftoverBytes, chunk]);
+        }
+        while (chunk.length >= chunkPtr + 5) {
+            const bitStream = new jDataView(chunk.slice(chunkPtr, chunkPtr + 5));
 
             // Validate syncword
             const syncword = bitStream.getUint16();
@@ -49,31 +48,16 @@ const handleReadStream = (inputStream) => {
             // Convert from word size to byte size
             frameSize *= 2;
 
-            console.log('Bit rate', bitRate, 'kbps', 'Frame size', frameSize, 'bytes');
+            //console.log('Bit rate', bitRate, 'kbps', 'Frame size', frameSize, 'bytes');
 
-            // Read remaining frame
-            const frame = inputStream.read(frameSize - 5);
-
-            // Merge frame header and actual frame
-            outputStream.push(new jDataView(Buffer.concat([frameHeader, frame])));
+            if (chunk.length >= chunkPtr + frameSize) {
+                this.push(new jDataView(chunk.slice(chunkPtr, chunkPtr + frameSize)));
+                chunkPtr += frameSize;
+            } else {
+                break;
+            }
         }
-
-        // Read frames
-        let chunk = null;
-        while ((chunk = inputStream.read(frameSize)) !== null) {
-            const bitStream = new jDataView(chunk);
-
-            outputStream.push(bitStream);
-        }
-    });
-
-    inputStream.on('end', () => {
-        outputStream.end();
-
-        console.log('Stream ended');
-    });
-
-    return outputStream;
-};
-
-export default handleReadStream;
+        leftoverBytes = chunk.slice(chunkPtr);
+        callback();
+    }
+)};
