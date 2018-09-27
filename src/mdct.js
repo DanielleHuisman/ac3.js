@@ -77,8 +77,8 @@ export const IMDCT = function() {
             Z64B[k * 2] = (coeffs[2 * (N/4-2*k-1 + 1)] * xcos2[k]) - (coeffs[4 * k + 2] * xsin2[k]);
             Z64B[k * 2 + 1] = (coeffs[4 * k + 2] * xcos2[k]) + (coeffs[2 * (N/4-2*k-1 + 1)] * xsin2[k]);
         }
-        fft64.inverseTransform(z64A, Z64a);
-        fft64.inverseTransform(z64B, Z64b);
+        fft64.inverseTransform(z64a, Z64A);
+        fft64.inverseTransform(z64b, Z64B);
         for (let n = 0; n < N/8; n++) {
             y64a[n * 2] = (z64a[n * 2] * xcos2[n]) - (z64a[n * 2 + 1] * xsin2[n]);
             y64a[n * 2 + 1] = (z64a[n * 2 + 1] * xcos2[n]) + (z64a[n * 2] * xsin2[n]);
