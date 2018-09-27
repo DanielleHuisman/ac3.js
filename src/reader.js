@@ -57,7 +57,6 @@ export const AC3Deframer = function() {
                 break;
             }
         }
-        debugger;
         leftoverBytes = chunk.slice(chunkPtr);
         callback();
     }

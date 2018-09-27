@@ -30,7 +30,7 @@ function calc_lowcomp(a, b0, b1, bin) {
     return a;
 }
 
-export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fastleak, slowleak) => {
+export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fastleak, slowleak, delt) => {
     let bndstrt = MASKTAB[start];
     let bndend = MASKTAB[end - 1] + 1;
     let psd = new Array(end);
@@ -113,20 +113,22 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
         mask[bin] = Math.max(excite[bin], HTH[bsi.fscod][bin]);
     }
 
-    if (audblk.deltbae === 0 || audblk.deltbae === 1) {
+    if (delt != null) {
+        debugger;
         let band = 0;
-        for (let seg = 0; seg < audblk.deltnseg + 1; seg++) {
-            band += audblk.deltoffst[seg];
-        }
-        if (deltba[seg] >= 4) {
-            delta = (deltba[seg] - 3) << 7;
-        } else {
-            delta = (deltba[seg] - 4) << 7;
-        }
+        for (let seg = 0; seg < delt.nseg + 1; seg++) {
+            let delta;
+            band += delt.offst[seg];
+            if (delt.ba[seg] >= 4) {
+                delta = (delt.ba[seg] - 3) << 7;
+            } else {
+                delta = (delt.ba[seg] - 4) << 7;
+            }
         
-        for (let k = 0; k < deltlen[seg]; k++) {
-            mask[band] += delta;
-            band++;
+            for (let k = 0; k < delt.len[seg]; k++) {
+                mask[band] += delta;
+                band++;
+            }
         }
     }
 
