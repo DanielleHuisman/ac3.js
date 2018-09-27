@@ -630,10 +630,10 @@ AC3FrameDecoder.prototype.pcmBytes = function() {
     let sampleBytes = new Uint8Array(6144);
     let sample;
     for (let i = 0; i < 1536; i++) {
-        sample = this.samples[0][i];
+        sample = this.samples[0][i] * 65535;
         sampleBytes[i * 4] = sample & 0xff;
         sampleBytes[i * 4 + 1] = sample >> 8;
-        sample = this.samples[1][i];
+        sample = this.samples[1][i] * 65535;
         sampleBytes[i * 4 + 2] = sample & 0xff;
         sampleBytes[i * 4 + 3] = sample >> 8;
     }
