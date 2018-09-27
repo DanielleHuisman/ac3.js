@@ -1,6 +1,6 @@
 import through2 from 'through2';
 
-import { EXP_REUSE, EXP_D15, EXP_D25, EXP_D45 } from './constants';
+import { BSID_STANDARD, BSID_ANNEX_D, BSID_ANNEX_E, EXP_REUSE, EXP_D15, EXP_D25, EXP_D45 } from './constants';
 import { unpackExponents } from './exponents';
 import { FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR, REMATRIX_BANDS, CLEV, SLEV } from './tables';
 import { bitAllocation } from './bitallocation';
@@ -40,7 +40,10 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
     bsi.bsid = frame.getUnsigned(5);
     bsi.bsmod = frame.getUnsigned(3);
 
-    if (bsi.bsid !== 0x8 && bsi.bsid !== 0x6) {
+    if (bsi.bsid !== BSID_STANDARD && bsi.bsid !== BSID_ANNEX_D) {
+        if (bsi.bsid === BSID_ANNEX_E) {
+            throw new Error('Enhanced AC-3 streams are not supported.');
+        }
         throw new Error(`Invalid bsid ${bsi.bsid.toString(2)}`);
     }
 
@@ -86,12 +89,28 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
     bsi.copyrightb = frame.getUnsigned(1);
     bsi.origbs = frame.getUnsigned(1);
     if (frame.getUnsigned(1) !== 0) {
-        bsi.timecod1 = frame.getUnsigned(14);
+        if (bsi.bsid === BSID_ANNEX_D) {
+            bsi.dmixmod = frame.getUnsigned(2);
+            bsi.ltrtcmixlev = frame.getUnsigned(3);
+            bsi.ltrtsurmixlev = frame.getUnsigned(3);
+            bsi.lorocmixlev = frame.getUnsigned(3);
+            bsi.lorosurmixlev = frame.getUnsigned(3);
+        } else {
+            bsi.timecod1 = frame.getUnsigned(14);
+        }
     }
     if (frame.getUnsigned(1) !== 0) {
-        bsi.timecod2 = frame.getUnsigned(14);
+        if (bsi.bsid === BSID_ANNEX_D) {
+            bsi.dsurexmod = frame.getUnsigned(2);
+            bsi.dheadphonmod = frame.getUnsigned(2);
+            bsi.adconvtyp = frame.getUnsigned(1);
+            bsi.xbsi2 = frame.getUnint8();
+            bsi.encinfo = frame.getUnsigned(1);
+        } else {
+            bsi.timecod2 = frame.getUnsigned(14);
+        }
     }
-    if (frame.getUnsigned(1) !== 0) {
+    if(frame.getUnsigned(1) !== 0) {
         bsi.addbsil = frame.getUnsigned(6);
         bsi.addbsi = frame.getBytes(bsi.addbsil + 1);
     }
