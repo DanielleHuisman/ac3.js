@@ -2,7 +2,7 @@ import through2 from 'through2';
 
 import { EXP_REUSE, EXP_D15, EXP_D25, EXP_D45 } from './constants';
 import { unpackExponents } from './exponents';
-import { FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR, REMATRIX_BANDS } from './tables';
+import { FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR, REMATRIX_BANDS, CLEV, SLEV } from './tables';
 import { bitAllocation } from './bitallocation';
 import { MantissaReader, getDitherMantissa } from './mantissa';
 import { IMDCT } from './mdct';
@@ -532,8 +532,6 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
                 } 
             }
         }
-        
-        // TODO: Downmix
 
         for (let ch = 0; ch < bsi.nfchans; ch++) {
             if (audblk.blksw[ch]) {
@@ -542,6 +540,70 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
                 this.imdct[ch].process256(audblk.chmant[ch], this.samples[ch], blk * 256);
             }
         }
+    }
+
+    // TODO: Support other downmix modes.
+    let leftCoeffs;
+    let rightCoeffs;
+    let clev;
+    let slev;
+    let totlev;
+    switch (bsi.acmod) {
+        case 0: // 1+1 independent mono channels
+            leftCoeffs = [1, 0];
+            rightCoeffs = [0, 1];
+            break;
+        case 1: // 1 mono channel
+            leftCoeffs = [0.707];
+            rightCoeffs = [0.707];
+            break;
+        case 2: // left/right
+            leftCoeffs = [1, 0];
+            rightCoeffs = [0, 1];
+            break;
+        case 3: // left/center/right
+            clev = CLEV[bsi.cmixlev];
+            totlev = (1 + clev);
+            leftCoeffs = [1 / totlev, clev / totlev, 0];
+            rightCoeffs = [0, clev / totlev, 1 / totlev];
+            break;
+        case 4: // left/right/surround
+            slev = SLEV[bsi.surmixlev] * 0.707;
+            totlev = (1 + clev);
+            leftCoeffs = [1 / totlev, 0, slev / totlev];
+            rightCoeffs = [0, 1 / totlev, slev / totlev];
+            break;
+        case 5: // left/center/right/surround
+            clev = CLEV[bsi.cmixlev];
+            slev = SLEV[bsi.surmixlev] * 0.707;
+            totlev = (1 + clev + slev);
+            leftCoeffs = [1 / totlev, clev / totlev, 0];
+            rightCoeffs = [0, clev / totlev, 1 / totlev];
+            break;
+        case 6: // left/right/left surround/right surroun
+            slev = SLEV[bsi.surmixlev];
+            totlev = (1 + slev);
+            leftCoeffs = [1 / totlev, 0, slev / totlev, 0];
+            rightCoeffs = [0, 1 / totlev, 0, slev / totlev];
+            break;
+        case 7: // left/center/right/left surround/right surround
+            clev = CLEV[bsi.cmixlev];
+            slev = SLEV[bsi.surmixlev];
+            totlev = (1 + clev + slev);
+            leftCoeffs = [1 / totlev, clev / totlev, 0, slev / totlev, 0];
+            rightCoeffs = [0, clev / totlev, 1 / totlev, 0, slev / totlev];
+            break;
+    }
+
+    for (let i = 0; i < 1536; i++) {
+        let left = 0;
+        let right = 0;
+        for (let ch = 0; ch < bsi.nfchans; ch++) {
+            left += this.samples[ch][i] * leftCoeffs[ch];
+            right += this.samples[ch][i] * rightCoeffs[ch];
+        }
+        this.samples[0][i] = left;
+        this.samples[1][i] = right;
     }
 };
 
