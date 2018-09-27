@@ -2,7 +2,7 @@ import through2 from 'through2';
 
 import { EXP_REUSE, EXP_D15, EXP_D25, EXP_D45 } from './constants';
 import { unpackExponents } from './exponents';
-import { FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR } from './tables';
+import { FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR, REMATRIX_BANDS } from './tables';
 import { bitAllocation } from './bitallocation';
 import { MantissaReader, getDitherMantissa } from './mantissa';
 import { IMDCT } from './mdct';
@@ -59,10 +59,10 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
     bsi.lfeon = frame.getUnsigned(1);
     bsi.dialnorm = frame.getUnsigned(5);
     if (frame.getUnsigned(1) !== 0) {
-        bsi.compr = frame.getUnint8();
+        bsi.compr = frame.getUint8();
     }
     if (frame.getUnsigned(1) !== 0) {
-        bsi.langcod = frame.getUnint8();
+        bsi.langcod = frame.getUint8();
     }
     if (frame.getUnsigned(1) !== 0) {
         bsi.mixlevel = frame.getUnsigned(5);
@@ -72,10 +72,10 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
     if (bsi.acmod === 0x0) {
         bsi.dialnorm2 = frame.getUnsigned(5);
         if (frame.getUnsigned(1) !== 0) {
-            bsi.compr2 = frame.getUnint8();
+            bsi.compr2 = frame.getUint8();
         }
         if (frame.getUnsigned(1) !== 0) {
-            bsi.langcod2 = frame.getUnint8();
+            bsi.langcod2 = frame.getUint8();
         }
         if (frame.getUnsigned(1) !== 0) {
             bsi.mixlevel2 = frame.getUnsigned(5);
@@ -122,6 +122,7 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
     audblk.nchgrps = new Array(bsi.nfchans);
     audblk.exps = new Array(bsi.nfchans);
     audblk.gainrng = new Array(bsi.nfchans);
+    audblk.rematflg = [];
 
     for (let blk = 0; blk < 6; blk++) {
         let mantissas = new MantissaReader(frame);
@@ -516,7 +517,22 @@ AC3FrameDecoder.prototype.decodeFrame = function(frame) {
             }
         }
 
-        // TODO: Rematrixing
+        for (let i = 0; i < audblk.rematflg.length; i++) {
+            if (audblk.rematflg[i]) {
+                let beginBin = REMATRIX_BANDS[i];
+                let endBin = REMATRIX_BANDS[i + 1];
+                if (audblk.cplinu && endBin >= 36 + audblk.cplbegf * 12) {
+                    endBin = 36 + audblk.cplbegf * 12;
+                }
+                for (let bin = beginBin; bin < endBin; bin++) {
+                    let left = audblk.chmant[0][bin];
+                    let right = audblk.chmant[1][bin];
+                    audblk.chmant[0][bin] = left + right;
+                    audblk.chmant[1][bin] = left - right;
+                } 
+            }
+        }
+        
         // TODO: Downmix
 
         for (let ch = 0; ch < bsi.nfchans; ch++) {
