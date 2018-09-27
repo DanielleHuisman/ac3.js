@@ -23,6 +23,6 @@ JavaScript ATSC A/52 (AC-3) decoder
 - [x] Rematrixing
 - [x] Inverse Transform
 - [x] Window, Overlap/Add
-- [/] Downmixing
+- [x] Downmixing
 - [ ] PCM Output Buffer
 - [ ] Output PCM
