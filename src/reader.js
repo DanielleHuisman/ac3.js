@@ -48,7 +48,7 @@ export const AC3Deframer = function() {
             // Convert from word size to byte size
             frameSize *= 2;
 
-            console.log('Bit rate', bitRate, 'kbps', 'Frame size', frameSize, 'bytes');
+            //console.log('Bit rate', bitRate, 'kbps', 'Frame size', frameSize, 'bytes');
 
             if (chunk.length >= chunkPtr + frameSize) {
                 this.push(new jDataView(chunk.slice(chunkPtr, chunkPtr + frameSize)));
