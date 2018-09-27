@@ -1,16 +1,16 @@
-import { BNDTAB, BNDSZ, LATAB, MASKTAB, BAPTAB, HTH } from "./tables";
+import {BNDTAB, BNDSZ, LATAB, MASKTAB, BAPTAB, HTH} from './tables';
 
-function logadd(a, b) {
-    let c = a - b;
-    let address = Math.min(Math.abs(c) >> 1, 255);
+const logadd = (a, b) => {
+    const c = a - b;
+    const address = Math.min(Math.abs(c) >> 1, 255);
     if (c >= 0) {
         return (a + LATAB[address]);
     } else {
         return (b + LATAB[address]);
     }
-}
+};
 
-function calc_lowcomp(a, b0, b1, bin) {
+const calcLowcomp = (a, b0, b1, bin) => {
     if (bin < 7) {
         if ((b0 + 256) === b1) {
             a = 384;
@@ -24,19 +24,19 @@ function calc_lowcomp(a, b0, b1, bin) {
             a = Math.max(0, a - 64);
         }
     } else {
-        a = Math.max(0, a - 128) ;
+        a = Math.max(0, a - 128);
     }
 
     return a;
-}
+};
 
 export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fastleak, slowleak, delt) => {
-    let bndstrt = MASKTAB[start];
-    let bndend = MASKTAB[end - 1] + 1;
-    let psd = new Array(end);
-    let bndpsd = new Array(bndend);
-    let excite = new Array(bndend);
-    let mask = new Array(bndend);
+    const bndstrt = MASKTAB[start];
+    const bndend = MASKTAB[end - 1] + 1;
+    const psd = new Array(end);
+    const bndpsd = new Array(bndend);
+    const excite = new Array(bndend);
+    const mask = new Array(bndend);
     let lowcomp = 0;
 
     for (let bin = start; bin < end; bin++) {
@@ -61,15 +61,15 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
     let begin;
 
     if (bndstrt === 0) {
-        lowcomp = calc_lowcomp(lowcomp, bndpsd[0], bndpsd[1], 0);
+        lowcomp = calcLowcomp(lowcomp, bndpsd[0], bndpsd[1], 0);
         excite[0] = bndpsd[0] - fgain - lowcomp;
-        lowcomp = calc_lowcomp(lowcomp, bndpsd[1], bndpsd[2], 1);
+        lowcomp = calcLowcomp(lowcomp, bndpsd[1], bndpsd[2], 1);
         excite[1] = bndpsd[1] - fgain - lowcomp;
         begin = 7;
-    
+
         for (let bin = 2; bin < 7; bin++) {
             if ((bndend !== 7) || (bin !== 6)) {
-                lowcomp = calc_lowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
+                lowcomp = calcLowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
             }
             fastleak = bndpsd[bin] - fgain;
             slowleak = bndpsd[bin] - audblk.sgain;
@@ -81,10 +81,10 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
                 }
             }
         }
-    
+
         for (let bin = begin; bin < Math.min(bndend, 22); bin++) {
             if ((bndend !== 7) || (bin !== 6)) {
-                lowcomp = calc_lowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
+                lowcomp = calcLowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
             }
             fastleak -= audblk.fdecay;
             fastleak = Math.max(fastleak, bndpsd[bin] - fgain);
@@ -92,7 +92,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
             slowleak = Math.max(slowleak, bndpsd[bin] - audblk.sgain);
             excite[bin] = Math.max(fastleak - lowcomp, slowleak);
         }
-    
+
         begin = 22;
     } else {
         begin = bndstrt;
@@ -114,7 +114,6 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
     }
 
     if (delt != null) {
-        debugger;
         let band = 0;
         for (let seg = 0; seg < delt.nseg + 1; seg++) {
             let delta;
@@ -124,7 +123,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
             } else {
                 delta = (delt.ba[seg] - 4) << 7;
             }
-        
+
             for (let k = 0; k < delt.len[seg]; k++) {
                 mask[band] += delta;
                 band++;
@@ -132,7 +131,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
         }
     }
 
-    let bap = new Array(end - start);
+    const bap = new Array(end - start);
     let i = start;
     j = bndstrt;
     do {
@@ -145,7 +144,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
         mask[j] &= 0x1fe0;
         mask[j] += audblk.floor;
         for (let k = i; k < lastbin; k++) {
-            let address = (psd[i] - mask[j]) >> 5 ;
+            let address = (psd[i] - mask[j]) >> 5;
             address = Math.min(63, Math.max(0, address));
             bap[i - start] = BAPTAB[address];
             i++;

@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
-import { AC3Deframer } from './reader';
-import { AC3FrameParser } from './frame';
+import {AC3Deframer} from './reader';
+import {AC3FrameParser} from './frame';
 
 const TEST_FILE = path.join(__dirname, '..', 'tests', 'test1.ac3');
 

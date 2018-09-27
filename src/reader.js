@@ -1,14 +1,13 @@
 import jDataView from 'jdataview';
 import through2 from 'through2';
 
-const BIT_RATES = [32,  40,  48,  56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640];
+const BIT_RATES = [32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640];
 
-export const AC3Deframer = function() { 
+export const AC3Deframer = () => {
     let frameSize;
-    let frameHeader;
     let leftoverBytes = Buffer.from([]);
 
-    return through2.obj(function (chunk, enc, callback) {
+    return through2.obj(function(chunk, enc, callback) {
         let chunkPtr = 0;
         if (leftoverBytes.length) {
             chunk = Buffer.concat([leftoverBytes, chunk]);
@@ -30,8 +29,8 @@ export const AC3Deframer = function() {
             const frameSizeCode = bitStream.getUnsigned(6);
 
             // Determine bit rate (in kbps) and frame size (in 16-bit words)
-            let bitRate = BIT_RATES[frameSizeCode >> 1];
-            switch(sampleRateCode) {
+            const bitRate = BIT_RATES[frameSizeCode >> 1];
+            switch (sampleRateCode) {
                 case 0b00:
                     frameSize = 2 * bitRate;
                     break;
@@ -48,7 +47,7 @@ export const AC3Deframer = function() {
             // Convert from word size to byte size
             frameSize *= 2;
 
-            //console.log('Bit rate', bitRate, 'kbps', 'Frame size', frameSize, 'bytes');
+            // console.log('Bit rate', bitRate, 'kbps', 'Frame size', frameSize, 'bytes');
 
             if (chunk.length >= chunkPtr + frameSize) {
                 this.push(new jDataView(chunk.slice(chunkPtr, chunkPtr + frameSize)));
@@ -60,4 +59,5 @@ export const AC3Deframer = function() {
         leftoverBytes = chunk.slice(chunkPtr);
         callback();
     }
-)};
+    );
+};
