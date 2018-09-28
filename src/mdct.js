@@ -51,14 +51,14 @@ export class IMDCT {
             y128[n * 2 + 1] = (z128[n * 2 + 1] * xcos1[n]) + (z128[n * 2] * xsin1[n]);
         }
         for (let n = 0; n < N / 8; n++) {
-            x256[2*n] = -y128[2 * (N / 8+n) + 1] * WINDOW[2*n];
-            x256[2*n+1] = y128[2 * (N / 8-n-1)] * WINDOW[2*n+1];
-            x256[N / 4 + 2 * n] = -y128[2 * n] * WINDOW[N / 4+2*n];
-            x256[N / 4 + 2 * n + 1] = y128[2 * (N / 4-n-1) + 1] * WINDOW[N / 4+2*n+1];
-            x256[N / 2 + 2 * n] = -y128[2 * (N / 8+n)] * WINDOW[N / 2-2*n-1];
-            x256[N / 2 + 2 * n + 1] = y128[2 * (N / 8-n-1) + 1] * WINDOW[N / 2-2*n-2];
-            x256[3*N / 4 + 2 * n] = y128[2 * n + 1] * WINDOW[N / 4-2*n-1];
-            x256[3*N / 4 + 2 * n + 1] = -y128[2 * (N / 4-n-1)] * WINDOW[N / 4-2*n-2];
+            x256[2 * n] = -y128[2 * (N / 8 + n) + 1] * WINDOW[2 * n];
+            x256[2 * n + 1] = y128[2 * (N / 8 - n - 1)] * WINDOW[2 * n + 1];
+            x256[N / 4 + 2 * n] = -y128[2 * n] * WINDOW[N / 4 + 2 * n];
+            x256[N / 4 + 2 * n + 1] = y128[2 * (N / 4 - n - 1) + 1] * WINDOW[N / 4 + 2 * n + 1];
+            x256[N / 2 + 2 * n] = -y128[2 * (N / 8 + n)] * WINDOW[N / 2 - 2 * n - 1];
+            x256[N / 2 + 2 * n + 1] = y128[2 * (N / 8 - n - 1) + 1] * WINDOW[N / 2 - 2 * n - 2];
+            x256[3 * N / 4 + 2 * n] = y128[2 * n + 1] * WINDOW[N / 4 - 2 * n - 1];
+            x256[3 * N / 4 + 2 * n + 1] = -y128[2 * (N / 4 - n - 1)] * WINDOW[N / 4 - 2 * n - 2];
         }
         for (let n = 0; n < N / 2; n++) {
             let outputSample = 128 * (x256[n] + this.delaySamples[n]);
@@ -74,10 +74,10 @@ export class IMDCT {
 
     process128(coeffs, outputSamples, outputOffset) {
         for (let k = 0; k < N / 8; k++) {
-            Z64A[k * 2] = (coeffs[2 * (N / 4-2*k-1)] * xcos2[k]) - (coeffs[4 * k] * xsin2[k]);
-            Z64A[k * 2 + 1] = (coeffs[4 * k] * xcos2[k]) + (coeffs[2 * (N / 4-2*k-1)] * xsin2[k]);
-            Z64B[k * 2] = (coeffs[2 * (N / 4-2*k-1 + 1)] * xcos2[k]) - (coeffs[4 * k + 2] * xsin2[k]);
-            Z64B[k * 2 + 1] = (coeffs[4 * k + 2] * xcos2[k]) + (coeffs[2 * (N / 4-2*k-1 + 1)] * xsin2[k]);
+            Z64A[k * 2] = (coeffs[2 * (N / 4 - 2 * k - 1)] * xcos2[k]) - (coeffs[4 * k] * xsin2[k]);
+            Z64A[k * 2 + 1] = (coeffs[4 * k] * xcos2[k]) + (coeffs[2 * (N / 4 - 2 * k - 1)] * xsin2[k]);
+            Z64B[k * 2] = (coeffs[2 * (N / 4 - 2 * k - 1 + 1)] * xcos2[k]) - (coeffs[4 * k + 2] * xsin2[k]);
+            Z64B[k * 2 + 1] = (coeffs[4 * k + 2] * xcos2[k]) + (coeffs[2 * (N / 4 - 2 * k - 1 + 1)] * xsin2[k]);
         }
         fft64.inverseTransform(z64a, Z64A);
         fft64.inverseTransform(z64b, Z64B);
@@ -88,14 +88,14 @@ export class IMDCT {
             y64b[n * 2 + 1] = (z64b[n * 2 + 1] * xcos2[n]) + (z64b[n * 2] * xsin2[n]);
         }
         for (let n = 0; n < N / 8; n++) {
-            x256[2*n] = -y64a[2 * n + 1] * WINDOW[2*n];
-            x256[2*n+1] = y64a[2 * (N / 8-n-1)] * WINDOW[2*n+1];
-            x256[N / 4+2*n] = -y64a[2 * n] * WINDOW[N / 4+2*n];
-            x256[N / 4+2*n+1] = y64a[2 * (N / 8-n-1) + 1] * WINDOW[N / 4+2*n+1];
-            x256[N / 2+2*n] = -y64b[2 * n] * WINDOW[N / 2-2*n-1];
-            x256[N / 2+2*n+1] = y64b[2 * (N / 8-n-1) + 1] * WINDOW[N / 2-2*n-2];
-            x256[3*N / 4+2*n] = y64b[2 * n + 1] * WINDOW[N / 4-2*n-1];
-            x256[3*N / 4+2*n+1] = -y64b[2 * (N/-n-1)] * WINDOW[N / 4-2*n-2];
+            x256[2 * n] = -y64a[2 * n + 1] * WINDOW[2 * n];
+            x256[2 * n + 1] = y64a[2 * (N / 8 - n - 1)] * WINDOW[2 * n + 1];
+            x256[N / 4 + 2 * n] = -y64a[2 * n] * WINDOW[N / 4 + 2 * n];
+            x256[N / 4 + 2 * n + 1] = y64a[2 * (N / 8 - n - 1) + 1] * WINDOW[N / 4 + 2 * n + 1];
+            x256[N / 2 + 2 * n] = -y64b[2 * n] * WINDOW[N / 2 - 2 * n - 1];
+            x256[N / 2 + 2 * n + 1] = y64b[2 * (N / 8 - n - 1) + 1] * WINDOW[N / 2 - 2 * n - 2];
+            x256[3 * N / 4 + 2 * n] = y64b[2 * n + 1] * WINDOW[N / 4 - 2 * n - 1];
+            x256[3 * N / 4 + 2 * n + 1] = -y64b[2 * (N / -n - 1)] * WINDOW[N / 4 - 2 * n - 2];
         }
         for (let n = 0; n < N / 2; n++) {
             let outputSample = 64 * (x256[n] + this.delaySamples[n]);
