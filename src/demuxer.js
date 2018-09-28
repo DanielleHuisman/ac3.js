@@ -47,7 +47,7 @@ export class AC3Demuxer extends Demuxer {
             // Check if the full chunk is available
             if (this.stream.available(header.frameSize)) {
                 // Read chunk including header
-                const chunk = this.stream.readBuffer(header.frameSize).copy();
+                const chunk = this.stream.readBuffer(header.frameSize);
                 this.length += header.frameSize;
 
                 // console.log(this.length);
