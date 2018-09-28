@@ -63,6 +63,26 @@ export const readBSI = (stream) => {
 
     bsi.fscod = stream.read(2);
     bsi.frmsizecod = stream.read(6);
+
+    // Determine bit rate (in kbps) and frame size (in 16-bit words)
+    const bitRate = BIT_RATES[bsi.frmsizecod >> 1];
+    switch (bsi.fscod) {
+        case 0b00:
+            bsi.frmsize = 2 * bitRate;
+            break;
+        case 0b01:
+            bsi.frmsize = ((320 * bitRate) / 147 + (bsi.frmsizecod & 1)) >> 0;
+            break;
+        case 0b10:
+            bsi.frmsize = 3 * bitRate;
+            break;
+        default:
+            throw new Error(`Unknown sample rate code ${bsi.fscod.toString(2)}`);
+    }
+
+    // Convert from word size to byte size
+    bsi.frmsize *= 2;
+
     bsi.bsid = stream.read(5);
     bsi.bsmod = stream.read(3);
 

@@ -50,7 +50,6 @@ export class AC3Demuxer extends Demuxer {
                 const chunk = this.stream.readBuffer(header.frameSize);
                 this.length += header.frameSize;
 
-                // console.log(this.length);
                 this.emit('data', chunk);
             } else {
                 break;

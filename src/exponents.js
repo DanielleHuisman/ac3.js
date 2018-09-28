@@ -9,7 +9,7 @@ export const unpackExponents = (exps, absexp, grpsize, skip) => {
         dexps[(grp * 3) + 2] = ((exp % 25) % 5) >> 0;
     }
 
-    // Conveert to unbiased mapped values
+    // Convert to unbiased mapped values
     for (let i = 0; i < dexps.length; i++) {
         dexps[i] -= 2;
     }
