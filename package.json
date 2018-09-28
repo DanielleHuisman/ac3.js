@@ -21,12 +21,13 @@
   "scripts": {
     "lint": "eslint src --color",
     "build": "babel src --out-dir lib --copy-files --source-maps",
-    "dev": "babel-node src/index.js",
-    "debug": "babel-node --inspect-brk src/index.js",
-    "start": "node lib/index.js",
+    "dev": "babel-node example/index.js",
+    "dev:aurora": "babel-node example/aurora.js",
+    "debug": "babel-node --inspect-brk example/index.js",
     "prepublish": "yarn run build"
   },
   "dependencies": {
+    "av": "^0.4.9",
     "fft.js": "^4.0.3",
     "jdataview": "^2.5.0",
     "through2": "^2.0.3"

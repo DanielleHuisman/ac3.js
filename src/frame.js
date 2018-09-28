@@ -11,6 +11,8 @@ const CHANNELS = [2, 1, 2, 3, 3, 4, 4, 5];
 const GROUP_SIZE = [0, 1, 2, 4];
 
 export class AC3FrameDecoder {
+    packets = 0;
+
     constructor() {
         this.imdct = new Array(6);
         this.samples = new Array(6);

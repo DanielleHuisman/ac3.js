@@ -1,3 +1,6 @@
+export const BIT_RATES = [32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640];
+export const SAMPLE_RATES = [48000, 44100, 32000];
+
 export const BSID_STANDARD = 0x08;
 export const BSID_ANNEX_D = 0x06;
 export const BSID_ANNEX_E = 0x16;
