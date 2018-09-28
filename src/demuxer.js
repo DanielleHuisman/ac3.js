@@ -20,30 +20,13 @@ export class AC3Demuxer extends Demuxer {
         return false;
     }
 
-    readChunk(buffer) {
-        // Append buffer to internal stream
-        const size = this.stream.remainingBytes() + buffer.data.length;
-        console.log(this.stream.peekUInt16().toString(16), size);
-        this.stream.list.append(buffer);
-
+    readChunk() {
         while (this.stream.available(5)) {
             let header;
             try {
                 header = readHeader(this.stream);
             } catch (err) {
-                let offset = 0;
-                while (this.stream.available(offset + 2)) {
-                    if (this.stream.peekUInt16(offset) === 0x0b77) {
-                        console.log(this.stream.offset, 'found at ', offset);
-                        this.stream.advance(offset);
-                        break;
-                    } else {
-                        offset += 2;
-                    }
-                }
-
-                // this.emit('error', err);
-                continue;
+                return this.emit('error', err);
             }
 
             // Emit format information if necessary
@@ -64,7 +47,7 @@ export class AC3Demuxer extends Demuxer {
             // Check if the full chunk is available
             if (this.stream.available(header.frameSize)) {
                 // Read chunk including header
-                const chunk = this.stream.readBuffer(header.frameSize);
+                const chunk = this.stream.readBuffer(header.frameSize).copy();
                 this.length += header.frameSize;
 
                 // console.log(this.length);
