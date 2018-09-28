@@ -1,4 +1,4 @@
-import {BIT_RATES, SAMPLE_RATES} from './constants';
+import {BIT_RATES, SAMPLE_RATES, BSID_STANDARD, BSID_ANNEX_D, BSID_ANNEX_E, CHANNELS} from './constants';
 
 export const readHeader = (stream) => {
     // Validate syncword
@@ -46,4 +46,100 @@ export const readHeader = (stream) => {
         bitRate,
         frameSize
     };
+};
+
+export const readBSI = (stream) => {
+    // Syncword
+    const syncword = stream.read(16);
+    if (syncword != 0x0b77) {
+        throw new Error(`Invalid syncword ${syncword.toString(16)}`);
+    }
+
+    // Skip Error Detection Code
+    stream.advance(16);
+
+    // Bit Stream Information (BSI)
+    const bsi = {};
+
+    bsi.fscod = stream.read(2);
+    bsi.frmsizecod = stream.read(6);
+    bsi.bsid = stream.read(5);
+    bsi.bsmod = stream.read(3);
+
+    if (bsi.bsid !== BSID_STANDARD && bsi.bsid !== BSID_ANNEX_D) {
+        if (bsi.bsid === BSID_ANNEX_E) {
+            throw new Error('Enhanced AC-3 streams are not supported.');
+        }
+        throw new Error(`Invalid bsid ${bsi.bsid.toString(2)}`);
+    }
+
+    bsi.acmod = stream.read(3);
+    bsi.nfchans = CHANNELS[bsi.acmod];
+    if ((bsi.acmod & 0x1) !== 0 && bsi.acmod != 0x1) {
+        bsi.cmixlev = stream.read(2);
+    }
+    if ((bsi.acmod & 0x4) !== 0) {
+        bsi.surmixlev = stream.read(2);
+    }
+    if (bsi.acmod == 0x2) {
+        bsi.dsurmod = stream.read(2);
+    }
+
+    bsi.lfeon = stream.read(1);
+    bsi.dialnorm = stream.read(5);
+    if (stream.read(1) !== 0) {
+        bsi.compr = stream.read(8);
+    }
+    if (stream.read(1) !== 0) {
+        bsi.langcod = stream.read(8);
+    }
+    if (stream.read(1) !== 0) {
+        bsi.mixlevel = stream.read(5);
+        bsi.roomtyp = stream.read(2);
+    }
+
+    if (bsi.acmod === 0x0) {
+        bsi.dialnorm2 = stream.read(5);
+        if (stream.read(1) !== 0) {
+            bsi.compr2 = stream.read(8);
+        }
+        if (stream.read(1) !== 0) {
+            bsi.langcod2 = stream.read(8);
+        }
+        if (stream.read(1) !== 0) {
+            bsi.mixlevel2 = stream.read(5);
+            bsi.roomtyp2 = stream.read(2);
+        }
+    }
+
+    bsi.copyrightb = stream.read(1);
+    bsi.origbs = stream.read(1);
+    if (stream.read(1) !== 0) {
+        if (bsi.bsid === BSID_ANNEX_D) {
+            bsi.dmixmod = stream.read(2);
+            bsi.ltrtcmixlev = stream.read(3);
+            bsi.ltrtsurmixlev = stream.read(3);
+            bsi.lorocmixlev = stream.read(3);
+            bsi.lorosurmixlev = stream.read(3);
+        } else {
+            bsi.timecod1 = stream.read(14);
+        }
+    }
+    if (stream.read(1) !== 0) {
+        if (bsi.bsid === BSID_ANNEX_D) {
+            bsi.dsurexmod = stream.read(2);
+            bsi.dheadphonmod = stream.read(2);
+            bsi.adconvtyp = stream.read(1);
+            bsi.xbsi2 = stream.read(8);
+            bsi.encinfo = stream.read(1);
+        } else {
+            bsi.timecod2 = stream.read(14);
+        }
+    }
+    if (stream.read(1) !== 0) {
+        bsi.addbsil = stream.read(6);
+        bsi.addbsi = stream.stream.readSingleBuffer(bsi.addbsil + 1);
+    }
+
+    return bsi;
 };

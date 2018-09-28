@@ -1,9 +1,13 @@
 export const BIT_RATES = [32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640];
 export const SAMPLE_RATES = [48000, 44100, 32000];
+export const AUDIO_SAMPLES = 1536;
 
 export const BSID_STANDARD = 0x08;
 export const BSID_ANNEX_D = 0x06;
 export const BSID_ANNEX_E = 0x16;
+
+export const CHANNELS = [2, 1, 2, 3, 3, 4, 4, 5];
+export const GROUP_SIZE = [0, 1, 2, 4];
 
 export const EXP_REUSE = 0b00;
 export const EXP_D15 = 0b01;

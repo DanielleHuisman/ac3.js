@@ -1,6 +1,9 @@
 import {Decoder} from 'av';
 
-import {readHeader} from './header';
+import {AUDIO_SAMPLES} from './constants';
+import {readBSI} from './header';
+import {createAudioBlock, readAudioBlock} from './block';
+import {IMDCT} from './mdct';
 
 export class AC3Decoder extends Decoder {
     packets = 0;
@@ -11,19 +14,33 @@ export class AC3Decoder extends Decoder {
             return;
         }
 
-        // Read header
-        let header;
+        // Bit Stream Information (BSI)
+        let bsi;
         try {
-            header = readHeader(this.stream);
+            bsi = readBSI(this.bitstream);
         } catch (err) {
             return this.emit('error', err);
         }
 
-        console.log('Chunk | bit rate:', header.bitRate, 'kpbs | frame size:', header.frameSize, 'bytes');
+        // Intialize arrays
+        const samples = new Array(bsi.nfchans);
+        const imdct = new Array(bsi.nfchans);
+        for (let i = 0; i < bsi.nfchans; i++) {
+            samples[i] = new Uint16Array(AUDIO_SAMPLES);
+            imdct[i] = new IMDCT();
+        }
 
-        this.stream.advance(header.frameSize - 5);
+        // Audio Blocks
+        const audblk = createAudioBlock(bsi);
+        for (let i = 0; i < 6; i++) {
+            readAudioBlock(this.bitstream, bsi, samples, imdct, audblk);
 
-        return new Uint8Array();
+            // TODO
+        }
+
+        // TODO: read all packet data or skip data
+
+        return;
     }
 
     setCookie(cookie) {}
