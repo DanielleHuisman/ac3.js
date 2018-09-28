@@ -1,23 +1,32 @@
 {
-  "name": "a52.js",
-  "description": "JavaScript ATSC A/52 (AC-3) decoder",
-  "version": "1.0.0",
+  "name": "ac3.js",
+  "description": "JavaScript AC-3 (ATSC A/52) decoder",
+  "version": "0.1.0",
   "license": "MIT",
   "contributors": [
     "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
     "Karl Koscher <supersat@cs.washington.edu> (https://homes.cs.washington.edu/~supersat/)"
   ],
-  "repository": "github:DanielHuisman/a52.js",
+  "repository": "github:DanielHuisman/ac3.js",
   "keywords": [
     "atsc",
     "a52",
     "ac3",
     "ac-3",
+    "eac3",
+    "eac-3",
     "audio",
     "decoder",
     "browser"
   ],
   "main": "lib/index.js",
+  "files": [
+    "lib",
+    "LICENSE.md",
+    "README.md",
+    "package.json",
+    "yarn.lock"
+  ],
   "scripts": {
     "lint": "eslint src --color",
     "build": "babel src --out-dir lib --copy-files --source-maps",
