@@ -8,13 +8,35 @@ yarn add ac3.js
 ```
 
 ## Usage
-```JavaScript
+### Simple
+```javascript
+import fs from 'fs';
+import {AC3SimpleDecoder} from 'ac3.js';
+
+// This example loads an AC-3 audio file and writes the PCM data to file.
+// The output file is in PCM signed 16-bit interleaved format.
+
+// Initialize input and output stream
+const inputStream = fs.createReadStream('example.ac3');
+const outputStream = fs.createWriteStream('example.pcm');
+
+// Initialize simple decoder
+const simpleDecoder = new AC3SimpleDecoder(inputStream);
+
+// Write PCM data to output stream (data is an Uint8Array)
+simpleDecoder.on('data', (data) => {
+    outputStream.push(data);
+});
+```
+
+### Aurora.js
+```javascript
 import AV from 'av';
 import {AC3Demuxer, AC3Decoder} from 'ac3.js';
 
 // This example loads an AC-3 audio file and plays it.
-// - In Node.js this should play the audio using the speaker library
-// - In the browser this should play the audio using the Web Audio API
+// - In Node.js this should play the audio using the speaker module.
+// - In the browser this should play the audio using the Web Audio API.
 
 // Register demuxer and decoder
 AV.Demuxer.register(AC3Demuxer);
