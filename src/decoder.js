@@ -74,7 +74,7 @@ export class AC3Decoder extends Decoder {
             for (let i = 0; i < AUDIO_SAMPLES; i++) {
                 for (let ch = 0; ch < CHANNELS; ch++) {
                     sample = samples[ch][i] * 65535;
-                    result[i + ch * AUDIO_SAMPLES] = sample;
+                    result[ch + i * 2] = sample;
                 }
             }
             return result;
