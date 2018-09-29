@@ -2,7 +2,7 @@ import {EXPONENT_GROUP_SIZE, EXP_REUSE, EXP_D15, EXP_D25, EXP_D45} from './const
 import {FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR, REMATRIX_BANDS} from './tables';
 import {unpackExponents} from './exponents';
 import {bitAllocation} from './bitallocation';
-import {MantissaReader, getDitherMantissa} from './mantissas';
+import {MantissaReader, getDitherMantissa} from './mantissa';
 
 export const createAudioBlock = (bsi) => ({
     blksw: new Array(bsi.nfchans),
