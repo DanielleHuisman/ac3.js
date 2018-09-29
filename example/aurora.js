@@ -36,19 +36,18 @@ outputStream.on('end', () => {
 // Initialize asset
 const asset = AV.Asset.fromFile(INPUT_FILE);
 
-// TODO: fix the conversion from float64 to uint8
+// TODO: fix the conversion from float32 to uint8
 asset.on('data', (buffer) => {
-    const sampleBytes = new Uint8Array(1536 * 2 * 2);
+    const sampleBytes = new Uint8Array(buffer.length * 2);
     for (let i = 0; i < buffer.length / 2; i++) {
-        const sample = buffer[i] * Math.pow(2, 15);
-        sampleBytes[i] = sample & 0xff;
-        sampleBytes[i + 1] = sample >> 8;
+        let sample = buffer[i] * Math.pow(2, 16);
+        sampleBytes[i * 4] = sample & 0xff;
+        sampleBytes[i * 4 + 1] = sample >> 8;
 
-        sampleBytes[i + buffer.length / 2] = sample & 0xff;
-        sampleBytes[i + buffer.length / 2] = sample >> 8;
+        sample = buffer[i + buffer.length / 2] * Math.pow(2, 16);
+        sampleBytes[i * 4 + 2] = sample & 0xff;
+        sampleBytes[i * 4 + 3] = sample >> 8;
     }
-
-    console.log(buffer.length, sampleBytes.length);
 
     objectStream.push(sampleBytes);
 });
