@@ -2,7 +2,7 @@ import {Decoder} from 'av';
 
 import {AUDIO_SAMPLES} from './constants';
 import {readBSI} from './header';
-import {createAudioBlock, readAudioBlock} from './block';
+import {createAudioBlock, readAudioBlock} from './audioblock';
 import {IMDCT} from './mdct';
 import {downmix} from './downmix';
 

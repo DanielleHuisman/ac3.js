@@ -4,7 +4,7 @@ import path from 'path';
 import {AC3SimpleDecoder} from '../src';
 
 const INPUT_FILE = path.join(__dirname, '..', 'tests', 'test1.ac3');
-const OUTPUT_FILE = path.join(__dirname, 'test1_aurora.bin');
+const OUTPUT_FILE = path.join(__dirname, 'test1.pcm');
 
 // Initialize input and output stream
 const inputStream = fs.createReadStream(INPUT_FILE);

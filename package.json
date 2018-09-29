@@ -30,9 +30,9 @@
   "scripts": {
     "lint": "eslint src --color",
     "build": "babel src --out-dir lib --copy-files --source-maps",
-    "dev": "babel-node example/index.js",
+    "dev:simple": "babel-node example/simple.js",
     "dev:aurora": "babel-node example/aurora.js",
-    "debug": "babel-node --inspect-brk example/index.js",
+    "debug": "babel-node --inspect-brk example/simple.js",
     "prepublish": "yarn run build"
   },
   "dependencies": {
