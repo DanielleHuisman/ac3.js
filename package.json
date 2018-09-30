@@ -1,7 +1,7 @@
 {
   "name": "ac3.js",
   "description": "JavaScript AC-3 (ATSC A/52) decoder",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "contributors": [
     "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "av": "^0.4.9",
+    "babel-runtime": "^6.26.0",
     "fft.js": "^4.0.3"
   },
   "devDependencies": {
