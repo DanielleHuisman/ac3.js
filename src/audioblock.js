@@ -66,6 +66,10 @@ export const readAudioBlock = (stream, bsi, samples, imdct, audblk, blk) => {
                 audblk.cplbndstrc[bnd] = stream.read(1);
                 audblk.ncplbnd -= audblk.cplbndstrc[bnd];
             }
+        } else {
+            for (let ch = 0; ch < bsi.nfchans; ch++) {
+                audblk.chincpl[ch] = 0;
+            }
         }
     }
 
