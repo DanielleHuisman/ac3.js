@@ -25,7 +25,7 @@ const simpleDecoder = new AC3SimpleDecoder(inputStream);
 
 // Write PCM data to output stream (data is an Uint8Array)
 simpleDecoder.on('data', (data) => {
-    outputStream.push(data);
+    outputStream.write(data);
 });
 ```
 
