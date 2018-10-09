@@ -11,6 +11,8 @@ export class AC3Decoder extends Decoder {
     pcm = false;
     samples = null;
     imdct = null;
+    dynrng = 0;
+    dynrng2 = 0;
 
     constructor(demuxer, format, pcm = false) {
         super(demuxer, format);
@@ -54,6 +56,30 @@ export class AC3Decoder extends Decoder {
         for (let blk = 0; blk < 6; blk++) {
             readAudioBlock(this.bitstream, bsi, this.samples, this.imdct, audblk, blk);
         }
+
+        // Store the new Dynamic Range Control levels if present
+        if (bsi.dynrng !== undefined) {
+            this.dynrng = Math.pow(2, ((bsi.dynrng & 0x80) !== 0 ? -4 + (bsi.dynrng & 0x60) : bsi.dynrng & 0x60) + 1);
+            this.dynrng += ((bsi.dynrng & 0x1f) + 32) / 64;
+        }
+        if (bsi.dynrng2 !== undefined) {
+            this.dynrng2 = Math.pow(2, ((bsi.dynrng2 & 0x80) !== 0 ? -4 + (bsi.dynrng2 & 0x60) : bsi.dynrng2 & 0x60) + 1);
+            this.dynrng2 += ((bsi.dynrng2 & 0x1f) + 32) / 64;
+        }
+
+        // Dynamic Range Control
+        for (let i = 0; i < 1536; i++) {
+            if (bsi.acmod === 0 || bsi.acmod === 2) {
+                this.samples[0][i] *= this.dynrng;
+                this.samples[1][i] *= this.dynrng2;
+            } else {
+                for (let ch = 0; ch < bsi.nfchans; ch++) {
+                    this.samples[ch][i] *= this.dynrng;
+                }
+            }
+        }
+
+        // TODO: Heavy Compression
 
         // Downmixing
         downmix(bsi, this.samples);
