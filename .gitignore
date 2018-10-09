@@ -5,3 +5,4 @@ lib/
 *.log.*
 
 example/*.bin
+example/*.pcm
