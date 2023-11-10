@@ -1,7 +1,7 @@
 {
     "name": "ac3.js",
     "description": "JavaScript AC-3 (ATSC A/52) decoder",
-    "version": "0.2.4",
+    "version": "0.3.0",
     "license": "MIT",
     "contributors": [
         "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
