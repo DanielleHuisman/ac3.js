@@ -64,7 +64,7 @@ For detailed information on how to use Aurora.js, check out the [documentation](
 
 ## Authors
 
--   [Daniel Huisman](https://github.com/DanielHuisman)
+-   [Danielle Huisman](https://github.com/DanielleHuisman)
 -   [Karl Koscher](https://github.com/supersat)
 
 ## License

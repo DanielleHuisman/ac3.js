@@ -4,10 +4,10 @@
     "version": "0.3.0",
     "license": "MIT",
     "contributors": [
-        "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
+        "Danielle Huisman <danielle@huisman.me> (https://github.com/DanielleHuisman)",
         "Karl Koscher <supersat@cs.washington.edu> (https://homes.cs.washington.edu/~supersat/)"
     ],
-    "repository": "github:DanielHuisman/ac3.js",
+    "repository": "github:DanielleHuisman/ac3.js",
     "keywords": [
         "atsc",
         "a52",
