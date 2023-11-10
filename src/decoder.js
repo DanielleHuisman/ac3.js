@@ -1,10 +1,10 @@
 import {Decoder} from 'av';
 
-import {AUDIO_SAMPLES} from './constants';
-import {readBSI} from './header';
 import {createAudioBlock, readAudioBlock} from './audioblock';
-import {IMDCT} from './mdct';
+import {AUDIO_SAMPLES} from './constants';
 import {downmix} from './downmix';
+import {readBSI} from './header';
+import {IMDCT} from './mdct';
 
 export class AC3Decoder extends Decoder {
     packets = 0;
@@ -65,7 +65,10 @@ export class AC3Decoder extends Decoder {
         }
         if (bsi.dynrng2 !== undefined) {
             this.dynrng2 = (bsi.dynrng2 & 0x60) >> 5;
-            this.dynrng2 = Math.pow(2, ((bsi.dynrng2 & 0x80) !== 0 ? -4 + (this.dynrng2 & 0x60) : this.dynrng2 & 0x60) + 1);
+            this.dynrng2 = Math.pow(
+                2,
+                ((bsi.dynrng2 & 0x80) !== 0 ? -4 + (this.dynrng2 & 0x60) : this.dynrng2 & 0x60) + 1
+            );
             this.dynrng2 += ((bsi.dynrng2 & 0x1f) + 32) / 64;
         }
 
@@ -80,7 +83,6 @@ export class AC3Decoder extends Decoder {
                 }
             }
         }
-
 
         // Heavy Compression
         if (bsi.compr !== undefined) {
@@ -143,5 +145,5 @@ export class AC3Decoder extends Decoder {
         }
     }
 
-    setCookie(cookie) {}
-};
+    setCookie(_cookie) {}
+}

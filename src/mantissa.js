@@ -50,9 +50,10 @@ export class MantissaReader {
             case 15:
                 return this.stream.read(16, true) / Math.pow(2, 15);
             default:
+                // eslint-disable-next-line no-debugger
                 debugger;
         }
     }
-};
+}
 
 export const getDitherMantissa = () => (Math.random() - 0.5) * DITHER_CONST;

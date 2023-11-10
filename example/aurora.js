@@ -1,7 +1,7 @@
-import path from 'path';
 import AV from 'av';
+import path from 'path';
 
-import {AC3Demuxer, AC3Decoder} from '../src';
+import {AC3Decoder, AC3Demuxer} from '../src';
 
 const INPUT_FILE = path.join(__dirname, '..', 'tests', 'test1.ac3');
 

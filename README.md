@@ -3,15 +3,18 @@
 JavaScript AC-3 (ATSC A/52) decoder for the [Aurora.js](https://github.com/audiocogs/aurora.js) audio framework.
 
 ## Installation
+
 ```bash
 yarn add ac3.js
 ```
 
 ## Usage
+
 ### Simple
+
 ```javascript
-import fs from 'fs';
 import {AC3SimpleDecoder} from 'ac3.js';
+import fs from 'fs';
 
 // This example loads an AC-3 audio file and writes the PCM data to file.
 // The output file is in PCM signed 16-bit interleaved format.
@@ -30,9 +33,10 @@ simpleDecoder.on('data', (data) => {
 ```
 
 ### Aurora.js
+
 ```javascript
+import {AC3Decoder, AC3Demuxer} from 'ac3.js';
 import AV from 'av';
-import {AC3Demuxer, AC3Decoder} from 'ac3.js';
 
 // This example loads an AC-3 audio file and plays it.
 // - In Node.js this should play the audio using the speaker module.
@@ -59,40 +63,46 @@ player.play();
 For detailed information on how to use Aurora.js, check out the [documentation](https://github.com/audiocogs/aurora.js/wiki).
 
 ## Authors
-- [Daniel Huisman](https://github.com/DanielHuisman)
-- [Karl Koscher](https://github.com/supersat)
+
+-   [Daniel Huisman](https://github.com/DanielHuisman)
+-   [Karl Koscher](https://github.com/supersat)
 
 ## License
+
 AC3.js is available under the terms of the MIT license.
 
 ## Progress
+
 ### Syntax implementation
-- [x] `syncframe`
-    - [x] `syncinfo`
-    - [x] `bsi`
-    - [x] `audblk`
-    - [x] `auxdata`
-    - [x] `errorcheck`
+
+-   [x] `syncframe`
+    -   [x] `syncinfo`
+    -   [x] `bsi`
+    -   [x] `audblk`
+    -   [x] `auxdata`
+    -   [x] `errorcheck`
 
 ### Decoding implementation
-- [x] Input Bit Stream
-- [x] Synchronization
-- [ ] Error Detection
-- [x] Unpack BSI
-- [x] Unpack Side Information
-- [x] Decode Exponents
-- [x] Bit Allocation
-- [x] Process Mantissas
-- [x] Decoupling
-- [x] Rematrixing
-- [x] Inverse Transform
-- [x] Window, Overlap/Add
-- [x] Downmixing
-- [x] PCM Output Buffer
-- [x] Output PCM
+
+-   [x] Input Bit Stream
+-   [x] Synchronization
+-   [ ] Error Detection
+-   [x] Unpack BSI
+-   [x] Unpack Side Information
+-   [x] Decode Exponents
+-   [x] Bit Allocation
+-   [x] Process Mantissas
+-   [x] Decoupling
+-   [x] Rematrixing
+-   [x] Inverse Transform
+-   [x] Window, Overlap/Add
+-   [x] Downmixing
+-   [x] PCM Output Buffer
+-   [x] Output PCM
 
 ### Roadmap
-- Support all downmixing modes
-- Support Enhanced AC-3 (E-AC-3)
-- Error detection
-- Unit tests
+
+-   Support all downmixing modes
+-   Support Enhanced AC-3 (E-AC-3)
+-   Error detection
+-   Unit tests

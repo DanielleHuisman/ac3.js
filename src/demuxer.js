@@ -56,4 +56,4 @@ export class AC3Demuxer extends Demuxer {
             }
         }
     }
-};
+}

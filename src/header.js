@@ -1,4 +1,4 @@
-import {BIT_RATES, SAMPLE_RATES, BSID_STANDARD, BSID_ANNEX_D, BSID_ANNEX_E, CHANNELS} from './constants';
+import {BIT_RATES, BSID_ANNEX_D, BSID_ANNEX_E, BSID_STANDARD, CHANNELS, SAMPLE_RATES} from './constants';
 
 export const readHeader = (stream) => {
     // Validate syncword

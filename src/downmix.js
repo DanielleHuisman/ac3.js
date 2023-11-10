@@ -23,33 +23,33 @@ export const downmix = (bsi, samples) => {
             break;
         case 3: // left/center/right
             clev = CLEV[bsi.cmixlev];
-            totlev = (1 + clev);
+            totlev = 1 + clev;
             leftCoeffs = [1 / totlev, clev / totlev, 0];
             rightCoeffs = [0, clev / totlev, 1 / totlev];
             break;
         case 4: // left/right/surround
             slev = SLEV[bsi.surmixlev] * 0.707;
-            totlev = (1 + clev);
+            totlev = 1 + clev;
             leftCoeffs = [1 / totlev, 0, slev / totlev];
             rightCoeffs = [0, 1 / totlev, slev / totlev];
             break;
         case 5: // left/center/right/surround
             clev = CLEV[bsi.cmixlev];
             slev = SLEV[bsi.surmixlev] * 0.707;
-            totlev = (1 + clev + slev);
+            totlev = 1 + clev + slev;
             leftCoeffs = [1 / totlev, clev / totlev, 0];
             rightCoeffs = [0, clev / totlev, 1 / totlev];
             break;
         case 6: // left/right/left surround/right surroun
             slev = SLEV[bsi.surmixlev];
-            totlev = (1 + slev);
+            totlev = 1 + slev;
             leftCoeffs = [1 / totlev, 0, slev / totlev, 0];
             rightCoeffs = [0, 1 / totlev, 0, slev / totlev];
             break;
         case 7: // left/center/right/left surround/right surround
             clev = CLEV[bsi.cmixlev];
             slev = SLEV[bsi.surmixlev];
-            totlev = (1 + clev + slev);
+            totlev = 1 + clev + slev;
             leftCoeffs = [1 / totlev, clev / totlev, 0, slev / totlev, 0];
             rightCoeffs = [0, clev / totlev, 1 / totlev, 0, slev / totlev];
             break;

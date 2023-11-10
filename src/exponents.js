@@ -5,8 +5,8 @@ export const unpackExponents = (exps, absexp, grpsize, skip) => {
     for (let grp = 0; grp < exps.length; grp++) {
         const exp = exps[grp];
         dexps[grp * 3] = (exp / 25) >> 0;
-        dexps[(grp * 3) + 1] = ((exp % 25) / 5) >> 0;
-        dexps[(grp * 3) + 2] = ((exp % 25) % 5) >> 0;
+        dexps[grp * 3 + 1] = ((exp % 25) / 5) >> 0;
+        dexps[grp * 3 + 2] = (exp % 25) % 5 >> 0;
     }
 
     // Convert to unbiased mapped values
@@ -26,7 +26,7 @@ export const unpackExponents = (exps, absexp, grpsize, skip) => {
     aexps[0] = absexp;
     for (let i = 0; i < dexps.length; i++) {
         for (let j = 0; j < grpsize; j++) {
-            aexps[(i * grpsize) + j + skip] = dexps[i];
+            aexps[i * grpsize + j + skip] = dexps[i];
         }
     }
     return aexps;

@@ -1,24 +1,24 @@
-import {BNDTAB, BNDSZ, LATAB, MASKTAB, BAPTAB, HTH} from './tables';
+import {BAPTAB, BNDSZ, BNDTAB, HTH, LATAB, MASKTAB} from './tables';
 
 const logadd = (a, b) => {
     const c = a - b;
     const address = Math.min(Math.abs(c) >> 1, 255);
     if (c >= 0) {
-        return (a + LATAB[address]);
+        return a + LATAB[address];
     } else {
-        return (b + LATAB[address]);
+        return b + LATAB[address];
     }
 };
 
 const calcLowcomp = (a, b0, b1, bin) => {
     if (bin < 7) {
-        if ((b0 + 256) === b1) {
+        if (b0 + 256 === b1) {
             a = 384;
         } else if (b0 > b1) {
             a = Math.max(0, a - 64);
         }
     } else if (bin < 20) {
-        if ((b0 + 256) === b1) {
+        if (b0 + 256 === b1) {
             a = 320;
         } else if (b0 > b1) {
             a = Math.max(0, a - 64);
@@ -68,13 +68,13 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
         begin = 7;
 
         for (let bin = 2; bin < 7; bin++) {
-            if ((bndend !== 7) || (bin !== 6)) {
+            if (bndend !== 7 || bin !== 6) {
                 lowcomp = calcLowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
             }
             fastleak = bndpsd[bin] - fgain;
             slowleak = bndpsd[bin] - audblk.sgain;
             excite[bin] = fastleak - lowcomp;
-            if ((bndend !== 7) || (bin !== 6)) {
+            if (bndend !== 7 || bin !== 6) {
                 if (bndpsd[bin] <= bndpsd[bin + 1]) {
                     begin = bin + 1;
                     break;
@@ -83,7 +83,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
         }
 
         for (let bin = begin; bin < Math.min(bndend, 22); bin++) {
-            if ((bndend !== 7) || (bin !== 6)) {
+            if (bndend !== 7 || bin !== 6) {
                 lowcomp = calcLowcomp(lowcomp, bndpsd[bin], bndpsd[bin + 1], bin);
             }
             fastleak -= audblk.fdecay;
@@ -108,7 +108,7 @@ export const bitAllocation = (bsi, audblk, start, end, exp, fgain, snroffset, fa
 
     for (let bin = bndstrt; bin < bndend; bin++) {
         if (bndpsd[bin] < audblk.dbknee) {
-            excite[bin] += ((audblk.dbknee - bndpsd[bin]) >> 2);
+            excite[bin] += (audblk.dbknee - bndpsd[bin]) >> 2;
         }
         mask[bin] = Math.max(excite[bin], HTH[bsi.fscod][bin]);
     }

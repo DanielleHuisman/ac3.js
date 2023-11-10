@@ -1,55 +1,55 @@
 {
-  "name": "ac3.js",
-  "description": "JavaScript AC-3 (ATSC A/52) decoder",
-  "version": "0.2.4",
-  "license": "MIT",
-  "contributors": [
-    "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
-    "Karl Koscher <supersat@cs.washington.edu> (https://homes.cs.washington.edu/~supersat/)"
-  ],
-  "repository": "github:DanielHuisman/ac3.js",
-  "keywords": [
-    "atsc",
-    "a52",
-    "ac3",
-    "ac-3",
-    "eac3",
-    "eac-3",
-    "audio",
-    "decoder",
-    "browser"
-  ],
-  "main": "lib/index.js",
-  "files": [
-    "lib",
-    "LICENSE.md",
-    "README.md",
-    "package.json",
-    "yarn.lock"
-  ],
-  "scripts": {
-    "lint": "eslint src --color",
-    "build": "babel src --out-dir lib --copy-files --source-maps",
-    "dev:simple": "babel-node example/simple.js",
-    "dev:aurora": "babel-node example/aurora.js",
-    "debug": "babel-node --inspect-brk example/simple.js",
-    "prepublish": "yarn run build"
-  },
-  "dependencies": {
-    "av": "^0.4.9",
-    "babel-runtime": "^6.26.0",
-    "fft.js": "^4.0.3"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^10.0.3",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-0": "^6.24.1",
-    "eslint": "^6.3.0",
-    "eslint-config-google": "^0.14.0",
-    "eslint-plugin-babel": "^5.3.0",
-    "eslint-plugin-import": "^2.18.2"
-  }
+    "name": "ac3.js",
+    "description": "JavaScript AC-3 (ATSC A/52) decoder",
+    "version": "0.2.4",
+    "license": "MIT",
+    "contributors": [
+        "Daniel Huisman <daniel@huisman.me> (https://danielhuisman.io)",
+        "Karl Koscher <supersat@cs.washington.edu> (https://homes.cs.washington.edu/~supersat/)"
+    ],
+    "repository": "github:DanielHuisman/ac3.js",
+    "keywords": [
+        "atsc",
+        "a52",
+        "ac3",
+        "ac-3",
+        "eac3",
+        "eac-3",
+        "audio",
+        "decoder",
+        "browser"
+    ],
+    "main": "lib/index.js",
+    "files": [
+        "lib",
+        "LICENSE.md",
+        "README.md",
+        "package.json",
+        "yarn.lock"
+    ],
+    "scripts": {
+        "lint": "eslint src",
+        "build": "babel src --out-dir lib --copy-files --source-maps",
+        "dev:simple": "babel-node example/simple.js",
+        "dev:aurora": "babel-node example/aurora.js",
+        "debug": "babel-node --inspect-brk example/simple.js",
+        "prepublish": "yarn run build"
+    },
+    "dependencies": {
+        "@babel/runtime": "^7.23.2",
+        "av": "^0.4.9",
+        "fft.js": "^4.0.3"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.23.0",
+        "@babel/core": "^7.23.3",
+        "@babel/eslint-parser": "^7.23.3",
+        "@babel/node": "^7.22.19",
+        "@babel/plugin-transform-runtime": "^7.23.3",
+        "@babel/preset-env": "^7.23.3",
+        "@trivago/prettier-plugin-sort-imports": "^4.2.1",
+        "eslint": "^8.53.0",
+        "eslint-config-prettier": "^9.0.0",
+        "prettier": "^3.0.3"
+    }
 }

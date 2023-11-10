@@ -1,7 +1,7 @@
-import {EventEmitter, Buffer, HTTPSource, FileSource, BufferSource} from 'av';
+import {Buffer, BufferSource, EventEmitter, FileSource, HTTPSource} from 'av';
 
-import {AC3Demuxer} from './demuxer';
 import {AC3Decoder} from './decoder';
+import {AC3Demuxer} from './demuxer';
 
 class InputStreamSource extends EventEmitter {
     constructor(inputStream) {
@@ -17,8 +17,7 @@ class InputStreamSource extends EventEmitter {
     start() {}
     pause() {}
     reset() {}
-};
-
+}
 
 export class AC3SimpleDecoder extends EventEmitter {
     constructor(input) {
@@ -58,4 +57,4 @@ export class AC3SimpleDecoder extends EventEmitter {
         // Start decoding process
         this.decoder.decode();
     }
-};
+}

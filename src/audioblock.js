@@ -1,8 +1,8 @@
-import {EXPONENT_GROUP_SIZE, EXP_REUSE, EXP_D15, EXP_D25, EXP_D45} from './constants';
-import {FAST_GAIN, FAST_DECAY, SLOW_DECAY, SLOW_GAIN, DB_PER_BIT, FLOOR, REMATRIX_BANDS} from './tables';
-import {unpackExponents} from './exponents';
 import {bitAllocation} from './bitallocation';
+import {EXPONENT_GROUP_SIZE, EXP_D15, EXP_D25, EXP_D45, EXP_REUSE} from './constants';
+import {unpackExponents} from './exponents';
 import {MantissaReader, getDitherMantissa} from './mantissa';
+import {DB_PER_BIT, FAST_DECAY, FAST_GAIN, FLOOR, REMATRIX_BANDS, SLOW_DECAY, SLOW_GAIN} from './tables';
 
 export const createAudioBlock = (bsi) => ({
     blksw: new Array(bsi.nfchans),
@@ -157,8 +157,8 @@ export const readAudioBlock = (stream, bsi, samples, imdct, audblk, blk) => {
 
     // Exponents for the coupling channel
     if (audblk.cplinu) {
-        audblk.cplstrtmant = (audblk.cplbegf * 12) + 37;
-        audblk.cplendmant = ((audblk.cplendf + 3) * 12) + 37;
+        audblk.cplstrtmant = audblk.cplbegf * 12 + 37;
+        audblk.cplendmant = (audblk.cplendf + 3) * 12 + 37;
 
         if (audblk.cplexpstr !== EXP_REUSE) {
             switch (audblk.cplexpstr) {
@@ -189,9 +189,9 @@ export const readAudioBlock = (stream, bsi, samples, imdct, audblk, blk) => {
         if (audblk.chexpstr[ch] !== EXP_REUSE) {
             audblk.strtmant[ch] = 0;
             if (audblk.chincpl[ch]) {
-                audblk.endmant[ch] = 37 + (12 * audblk.cplbegf);
+                audblk.endmant[ch] = 37 + 12 * audblk.cplbegf;
             } else {
-                audblk.endmant[ch] = 37 + (3 * (audblk.chbwcod[ch] + 12));
+                audblk.endmant[ch] = 37 + 3 * (audblk.chbwcod[ch] + 12);
             }
 
             switch (audblk.chexpstr[ch]) {
@@ -342,9 +342,18 @@ export const readAudioBlock = (stream, bsi, samples, imdct, audblk, blk) => {
                 len: audblk.deltlen[ch]
             };
         }
-        audblk.baps[ch] = bitAllocation(bsi, audblk, audblk.strtmant[ch],
-            audblk.endmant[ch], audblk.exps[ch], FAST_GAIN[audblk.fgaincod[ch]],
-            (((audblk.csnroffst - 15) << 4) + audblk.fsnroffst[ch]) << 2, 0, 0, delt);
+        audblk.baps[ch] = bitAllocation(
+            bsi,
+            audblk,
+            audblk.strtmant[ch],
+            audblk.endmant[ch],
+            audblk.exps[ch],
+            FAST_GAIN[audblk.fgaincod[ch]],
+            (((audblk.csnroffst - 15) << 4) + audblk.fsnroffst[ch]) << 2,
+            0,
+            0,
+            delt
+        );
     }
     if (audblk.cplinu) {
         let delt = null;
@@ -356,15 +365,32 @@ export const readAudioBlock = (stream, bsi, samples, imdct, audblk, blk) => {
                 len: audblk.cpldeltlen
             };
         }
-        audblk.cplbap = bitAllocation(bsi, audblk, audblk.cplstrtmant,
-            audblk.cplendmant, audblk.cplexps, FAST_GAIN[audblk.cplfgaincod],
+        audblk.cplbap = bitAllocation(
+            bsi,
+            audblk,
+            audblk.cplstrtmant,
+            audblk.cplendmant,
+            audblk.cplexps,
+            FAST_GAIN[audblk.cplfgaincod],
             (((audblk.csnroffst - 15) << 4) + audblk.cplfsnroffst) << 2,
-            (audblk.cplfleak << 8) + 768, (audblk.cplsleak << 8) + 768, delt);
+            (audblk.cplfleak << 8) + 768,
+            (audblk.cplsleak << 8) + 768,
+            delt
+        );
     }
     if (bsi.lfeon) {
-        audblk.lfebap = bitAllocation(bsi, audblk, audblk.lfestartmant,
-            audblk.lfeendmant, audblk.lfeexps, FAST_GAIN[audblk.lfefgaincod],
-            (((audblk.csnroffst - 15) << 4) + audblk.lfefsnroffst) << 2, 0, 0, null);
+        audblk.lfebap = bitAllocation(
+            bsi,
+            audblk,
+            audblk.lfestartmant,
+            audblk.lfeendmant,
+            audblk.lfeexps,
+            FAST_GAIN[audblk.lfefgaincod],
+            (((audblk.csnroffst - 15) << 4) + audblk.lfefsnroffst) << 2,
+            0,
+            0,
+            null
+        );
     }
 
     // Dummy data
@@ -420,7 +446,8 @@ export const readAudioBlock = (stream, bsi, samples, imdct, audblk, blk) => {
                         } else {
                             mantissa = audblk.cplmant[sbnd * 12 + bin];
                         }
-                        audblk.chmant[ch][(sbnd + audblk.cplbegf) * 12 + bin + 37] = mantissa * audblk.cplco[ch][sbnd] * 8;
+                        audblk.chmant[ch][(sbnd + audblk.cplbegf) * 12 + bin + 37] =
+                            mantissa * audblk.cplco[ch][sbnd] * 8;
                     }
                 }
             }
